@@ -6,5 +6,5 @@ import (
 )
 
 func InitializeRoutes(r *gin.Engine, c controller.Controller) {
-	r.GET("/nesto", c.RegisterUser)
+	r.POST("/register", c.RegisterUser)
 }

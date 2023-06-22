@@ -6,6 +6,7 @@ type Entity struct {
 	Username     *string `json:"username"`
 	Password     string  `json:"password"`
 	Icon         *string `json:"icon"`
+	Description  *string `json:"description"`
 	Type         int     `json:"type"`
 }
 

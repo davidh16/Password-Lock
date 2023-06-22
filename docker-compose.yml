@@ -1,0 +1,27 @@
+version: "3.9"
+
+services:
+  password-locker:
+    container_name: password-locker
+    volumes:
+      - /Users/davidhorvat/GolandProjects/password-lock:/app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8085:8080"
+  postgres:
+    image: postgres
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_NAME: "postgres"
+      POSTGRES_USER: "root"
+      POSTGRES_PASSWORD: "root"
+      POSTGRES_DB: "postgres"
+    ports:
+      - "5434:5432"
+
+volumes:
+  postgres-data:
+    driver: local

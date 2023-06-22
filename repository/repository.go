@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -15,6 +14,6 @@ func NewRepository(db *gorm.DB) Repository {
 	}
 }
 
-func (r Repository) Testiram() {
-	fmt.Println("aaaaa")
+func (r Repository) Db() *gorm.DB {
+	return r.db
 }

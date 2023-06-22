@@ -4,11 +4,14 @@ import (
 	"github.com/go-playground/validator/v10"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"time"
 )
 
 type User struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Uuid         string    `json:"uuid"`
+	EmailAddress string    `json:"email_address"`
+	Password     string    `json:"password"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 func (u *User) Validate() error {
@@ -22,8 +25,8 @@ func (u *User) Validate() error {
 }
 
 var ValidationRules = map[string]string{
-	"Username": "required",
-	"Password": "required,min=8",
+	"EmailAddress": "required,email",
+	"Password":     "required,min=8",
 }
 
 // BeforeCreate - Gorm hook that encrypts password before saving user to database
