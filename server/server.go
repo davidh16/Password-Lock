@@ -20,5 +20,8 @@ func NewServer(r *gin.Engine, ctrl *controller.Controller) Server {
 }
 
 func (s Server) Run(port string) {
-	s.router.Run(port)
+	err := s.router.Run(port)
+	if err != nil {
+		return
+	}
 }

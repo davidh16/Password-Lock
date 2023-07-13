@@ -8,6 +8,7 @@ type Entity struct {
 	Icon         *string `json:"icon"`
 	Description  *string `json:"description"`
 	Type         int     `json:"type"`
+	User         string  `json:"user"`
 }
 
 const (
