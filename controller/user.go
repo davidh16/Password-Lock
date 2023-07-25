@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"password-lock/models"
+	"password-lock/utils"
 )
 
 func (c Controller) RegisterUser(ctx *gin.Context) {
@@ -29,9 +30,23 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 		return
 	}
 
-	// TODO generirati secret key
+	secretKey, err := utils.GenerateRandomStringURLSafe()
+	if err != nil {
+		SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
 
-	// TODO poslati secret key na mail
+	err = utils.SendEmail(user.EmailAddress, secretKey)
+	if err != nil {
+		SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
 
 	SendResponse(ctx, Response{
 		Status:  http.StatusCreated,

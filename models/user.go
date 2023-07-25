@@ -35,7 +35,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 	// Hash the password
 	// ---- IMPORTANT ---
 	// it is important to set cost to 10 and below because,
-	// higher than that significantly increases duration of inserting in database (20 => 1:07 min)
+	// higher than that significantly increases duration of inserting in database (cost:20, duration:1:07min)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), 10)
 	if err != nil {
 		return err
