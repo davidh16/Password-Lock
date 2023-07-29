@@ -55,3 +55,37 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 	return
 
 }
+
+func (c Controller) Login(ctx *gin.Context) {
+
+	var credentials models.User
+
+	// decoding json message to user model
+	err := json.NewDecoder(ctx.Request.Body).Decode(&credentials)
+	if err != nil {
+		SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	user, err := c.service.Authenticate(credentials)
+	if err != nil {
+		SendResponse(ctx, Response{
+			Status: http.StatusUnauthorized,
+			Error:  err.Error(),
+		})
+	}
+
+	//TODO pozvati servis da generira i spremi session key
+
+	ctx.SetCookie(user.EmailAddress, "session_uuid", 600, "/", "localhost", false, true)
+
+	SendResponse(ctx, Response{
+		Status:  http.StatusOK,
+		Message: "successfully logged in",
+	})
+	return
+
+}

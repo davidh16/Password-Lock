@@ -3,11 +3,11 @@ package service
 import "password-lock/repository"
 
 type Service struct {
-	repository repository.Repository
+	userRepository repository.UserRepository
 }
 
-func NewService(repo repository.Repository) Service {
+func NewService(userRepo repository.UserRepository) Service {
 	return Service{
-		repository: repo,
+		userRepository: userRepo,
 	}
 }

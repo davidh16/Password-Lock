@@ -12,6 +12,8 @@ import (
 
 func main() {
 
+	//redis := db.ConnectToRedis()
+
 	pgInstance := db.ConnectToDatabase()
 
 	repo := repository.NewRepository(pgInstance)
