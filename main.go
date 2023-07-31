@@ -12,13 +12,13 @@ import (
 
 func main() {
 
-	//redis := db.ConnectToRedis()
+	redis := db.ConnectToRedis()
 
 	pgInstance := db.ConnectToDatabase()
 
-	repo := repository.NewRepository(pgInstance)
+	userRepo := repository.NewUserRepository(pgInstance)
 
-	svc := service.NewService(repo)
+	svc := service.NewService(redis, userRepo)
 
 	ctrl := controller.NewController(svc)
 	r := gin.Default()

@@ -5,6 +5,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"password-lock/models"
+	"password-lock/service"
 	"password-lock/utils"
 )
 
@@ -39,7 +40,7 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 		return
 	}
 
-	err = utils.SendEmail(user.EmailAddress, secretKey)
+	err = service.SendEmail(user.EmailAddress, secretKey)
 	if err != nil {
 		SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
@@ -76,11 +77,19 @@ func (c Controller) Login(ctx *gin.Context) {
 			Status: http.StatusUnauthorized,
 			Error:  err.Error(),
 		})
+		return
 	}
 
-	//TODO pozvati servis da generira i spremi session key
+	sessionKey, err := c.service.GenerateAndSaveSessionKey(credentials)
+	if err != nil {
+		SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
 
-	ctx.SetCookie(user.EmailAddress, "session_uuid", 600, "/", "localhost", false, true)
+	ctx.SetCookie(sessionKey, user.EmailAddress, 600, "/", "localhost", false, false)
 
 	SendResponse(ctx, Response{
 		Status:  http.StatusOK,

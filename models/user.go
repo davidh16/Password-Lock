@@ -45,3 +45,7 @@ func (u *User) BeforeCreate(tx *gorm.DB) error {
 
 	return nil
 }
+
+func (u *User) TableName() string {
+	return "users"
+}

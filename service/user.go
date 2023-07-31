@@ -7,7 +7,7 @@ import (
 )
 
 func (s Service) RegisterUser(user models.User) (*models.User, error) {
-	result := s.userRepository.Db().Create(&user)
+	result := s.userRepository.Db().Table("users").Create(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -21,7 +21,7 @@ func (s Service) Authenticate(credentials models.User) (*models.User, error) {
 		return nil, err
 	}
 
-	if user != nil {
+	if user == nil {
 		return nil, errors.New("user does not exist")
 	}
 

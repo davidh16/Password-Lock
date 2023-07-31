@@ -9,6 +9,7 @@ type Entity struct {
 	Description  *string `json:"description"`
 	Type         int     `json:"type"`
 	User         string  `json:"user"`
+	SecretKey    string
 }
 
 const (
@@ -19,3 +20,7 @@ const (
 	instagram
 	custom
 )
+
+func (e Entity) TableName() string {
+	return "entities"
+}
