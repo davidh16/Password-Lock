@@ -71,7 +71,7 @@ func (c Controller) Login(ctx *gin.Context) {
 		return
 	}
 
-	user, err := c.service.Authenticate(credentials)
+	_, err = c.service.Authenticate(credentials)
 	if err != nil {
 		SendResponse(ctx, Response{
 			Status: http.StatusUnauthorized,
@@ -89,7 +89,7 @@ func (c Controller) Login(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie(sessionKey, user.EmailAddress, 600, "/", "localhost", false, false)
+	ctx.SetCookie("session-cookie", sessionKey, 600, "/", "", true, true)
 
 	SendResponse(ctx, Response{
 		Status:  http.StatusOK,

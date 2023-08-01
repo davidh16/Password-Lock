@@ -5,11 +5,11 @@ type Entity struct {
 	EmailAddress *string `json:"email_address"`
 	Username     *string `json:"username"`
 	Password     string  `json:"password"`
-	Icon         *string `json:"icon"`
+	IconPath     *string `json:"icon_path"`
 	Description  *string `json:"description"`
 	Type         int     `json:"type"`
-	User         string  `json:"user"`
-	SecretKey    string
+	UserUuid     string  `json:"user_uuid"`
+	SecretKey    string  `json:"secret_key"`
 }
 
 const (

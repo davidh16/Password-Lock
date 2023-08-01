@@ -17,8 +17,13 @@ func main() {
 	pgInstance := db.ConnectToDatabase()
 
 	userRepo := repository.NewUserRepository(pgInstance)
+	entityRepo := repository.NewEntityRepository(pgInstance)
 
-	svc := service.NewService(redis, userRepo)
+	svc := service.NewService(
+		redis,
+		userRepo,
+		entityRepo,
+	)
 
 	ctrl := controller.NewController(svc)
 	r := gin.Default()

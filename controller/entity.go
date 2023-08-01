@@ -36,8 +36,21 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 		return
 	}
 
-	//TODO pozvati servise da na temelju tipa entiteta dohvati ikonicu sa diska ili bucketa, odnosno path
+	// in the future, this will fetch icon paths from some kind of cloud storage
+	if entity.Type != 5 {
+		iconPath := c.service.GetEntityIconPath(entity.Type)
+		entity.IconPath = &iconPath
+	}
 
-	encryptedPassword := c.service.EncryptPassword(entity.SecretKey, entity.Password)
+	entity.Password = c.service.EncryptPassword(entity.SecretKey, entity.Password)
+
+	_, err = c.service.CreateEntity(entity)
+	if err != nil {
+		SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
 
 }

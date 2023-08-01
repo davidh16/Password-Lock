@@ -8,4 +8,5 @@ import (
 func initializeRoutes(r *gin.Engine, ctrl *controller.Controller) {
 	r.POST("/register", ctrl.RegisterUser)
 	r.POST("/login", ctrl.Login)
+	r.POST("/entity", ctrl.CreateEntity)
 }
