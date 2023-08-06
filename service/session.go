@@ -12,10 +12,15 @@ func (s Service) GenerateAndSaveSessionKey(user models.User) (string, error) {
 
 	sessionKey := uuid.New().String()
 
-	err := s.redis.Set(ctx, sessionKey, user.EmailAddress, time.Minute*10).Err()
+	err := s.redis.Set(ctx, sessionKey, user.Uuid, time.Minute*10).Err()
 	if err != nil {
 		return "", err
 	}
 
 	return sessionKey, nil
+}
+
+func (s Service) TerminateSession(sessionId string) {
+	ctx := context.Background()
+	_ = s.redis.Del(ctx, sessionId)
 }

@@ -6,7 +6,11 @@ import (
 )
 
 func initializeRoutes(r *gin.Engine, ctrl *controller.Controller) {
+	// user routes
 	r.POST("/register", ctrl.RegisterUser)
 	r.POST("/login", ctrl.Login)
+	r.POST("/logout", ctrl.Logout)
+
+	// entity routes
 	r.POST("/entity", ctrl.CreateEntity)
 }

@@ -89,7 +89,7 @@ func (c Controller) Login(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("session-cookie", sessionKey, 600, "/", "", true, true)
+	ctx.SetCookie("session", sessionKey, 600, "/", "", true, true)
 
 	SendResponse(ctx, Response{
 		Status:  http.StatusOK,
@@ -97,4 +97,25 @@ func (c Controller) Login(ctx *gin.Context) {
 	})
 	return
 
+}
+
+func (c Controller) Logout(ctx *gin.Context) {
+	sessionId, err := ctx.Cookie("session")
+	if err != nil {
+		SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	c.service.TerminateSession(sessionId)
+
+	ctx.SetCookie("session", "", -1, "/", "", true, true)
+
+	SendResponse(ctx, Response{
+		Status:  http.StatusOK,
+		Message: "successfully logged out",
+	})
+	return
 }
