@@ -44,6 +44,17 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 
 	entity.Password = c.service.EncryptPassword(entity.SecretKey, entity.Password)
 
+	loggedUserUuid, err := ctx.Cookie("session")
+	if err != nil {
+		SendResponse(ctx, Response{
+			Status: http.StatusUnauthorized,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	entity.UserUuid = loggedUserUuid
+
 	_, err = c.service.CreateEntity(entity)
 	if err != nil {
 		SendResponse(ctx, Response{

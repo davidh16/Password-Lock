@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS entities (
     email_address varchar,
     username varchar,
     password varchar,
-    icon varchar,
+    icon_path varchar,
     description varchar,
     type int,
     user_uuid uuid REFERENCES users(uuid)

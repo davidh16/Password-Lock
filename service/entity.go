@@ -2,21 +2,28 @@ package service
 
 import (
 	"crypto/aes"
+	"crypto/cipher"
+	"encoding/base64"
 	"password-lock/models"
 )
 
 func (s Service) EncryptPassword(secretKey string, password string) string {
 
-	cipher, err := aes.NewCipher([]byte(secretKey))
+	c, err := aes.NewCipher([]byte(secretKey))
 	if err != nil {
 		panic(err)
 	}
 
-	// Make a buffer the same length as plaintext
-	encryptedPassword := make([]byte, len(password))
-	cipher.Encrypt(encryptedPassword, []byte(password))
+	gcm, err := cipher.NewGCM(c)
+	if err != nil {
+		panic(err)
+	}
 
-	return string(encryptedPassword)
+	nonce := make([]byte, gcm.NonceSize())
+
+	encryptedPassowrd := gcm.Seal(nonce, nonce, []byte(password), nil)
+
+	return base64.StdEncoding.EncodeToString(encryptedPassowrd)
 }
 
 func (s Service) GetEntityIconPath(entityType int) string {

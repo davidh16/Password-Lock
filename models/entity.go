@@ -9,7 +9,7 @@ type Entity struct {
 	Description  *string `json:"description"`
 	Type         int     `json:"type"`
 	UserUuid     string  `json:"user_uuid"`
-	SecretKey    string  `json:"secret_key"`
+	SecretKey    string  `json:"secret_key" gorm:"-"`
 }
 
 const (
