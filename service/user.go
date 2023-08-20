@@ -1,7 +1,9 @@
 package service
 
 import (
+	"context"
 	"errors"
+	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"password-lock/models"
 )
@@ -31,4 +33,36 @@ func (s Service) Authenticate(credentials models.User) (*models.User, error) {
 	}
 
 	return user, nil
+}
+
+func (s Service) Authorize(userUuid string, password string) error {
+	user, err := s.userRepository.FindUserByUuid(userUuid)
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		return errors.New("user does not exist")
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	if err != nil {
+		return err
+	}
+
+	return err
+}
+
+func (s Service) Me(ctx *gin.Context) string {
+	sessionUuid, err := ctx.Cookie("session")
+	if err != nil {
+		return ""
+	}
+
+	loggedInUser, err := s.redis.Get(context.Background(), sessionUuid).Result()
+	if err != nil {
+		return ""
+	}
+
+	return loggedInUser
 }

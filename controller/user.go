@@ -71,7 +71,7 @@ func (c Controller) Login(ctx *gin.Context) {
 		return
 	}
 
-	_, err = c.service.Authenticate(credentials)
+	user, err := c.service.Authenticate(credentials)
 	if err != nil {
 		SendResponse(ctx, Response{
 			Status: http.StatusUnauthorized,
@@ -80,7 +80,7 @@ func (c Controller) Login(ctx *gin.Context) {
 		return
 	}
 
-	sessionKey, err := c.service.GenerateAndSaveSessionKey(credentials)
+	sessionKey, err := c.service.GenerateAndSaveSessionKey(user)
 	if err != nil {
 		SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,

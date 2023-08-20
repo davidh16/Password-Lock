@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func (s Service) GenerateAndSaveSessionKey(user models.User) (string, error) {
+func (s Service) GenerateAndSaveSessionKey(user *models.User) (string, error) {
 	ctx := context.Background()
 
 	sessionKey := uuid.New().String()

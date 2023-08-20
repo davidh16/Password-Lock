@@ -49,3 +49,11 @@ func (s Service) CreateEntity(entity models.Entity) (*models.Entity, error) {
 	}
 	return &entity, nil
 }
+
+func (s Service) DeleteEntity(entityUuid string) error {
+	result := s.entityRepository.Db().Where("uuid=?", entityUuid).Delete(models.Entity{})
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}

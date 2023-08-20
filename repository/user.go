@@ -8,6 +8,7 @@ import (
 type UserRepository interface {
 	Db() *gorm.DB
 	FindUserByEmailAddress(user models.User) (*models.User, error)
+	FindUserByUuid(userUuid string) (*models.User, error)
 }
 
 type userRepository struct {
@@ -27,6 +28,15 @@ func (r userRepository) Db() *gorm.DB {
 func (r userRepository) FindUserByEmailAddress(user models.User) (*models.User, error) {
 	var foundUser models.User
 	result := r.db.Where("email_address = ?", user.EmailAddress).First(&foundUser)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &foundUser, nil
+}
+
+func (r userRepository) FindUserByUuid(userUuid string) (*models.User, error) {
+	var foundUser models.User
+	result := r.db.Where("uuid = ?", userUuid).First(&foundUser)
 	if result.Error != nil {
 		return nil, result.Error
 	}
