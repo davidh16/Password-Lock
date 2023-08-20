@@ -80,6 +80,24 @@ func (s Service) GetEntityByUuid(ctx *gin.Context, entityUuid string, secretKey 
 	return &entity, nil
 }
 
+func (s Service) ListEntities(ctx *gin.Context) ([]models.Entity, error) {
+	var entities []models.Entity
+	result := s.entityRepository.Db().Where("user_uuid=?", s.Me(ctx)).Find(&entities)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return hideEntityPasswords(entities), nil
+}
+
+func hideEntityPasswords(entities []models.Entity) []models.Entity {
+	var entitiyListWithHiddenPasswords []models.Entity
+	for _, entity := range entities {
+		entitiyListWithHiddenPasswords = append(entitiyListWithHiddenPasswords, *entity.HidePassword())
+	}
+	return entitiyListWithHiddenPasswords
+}
+
 func decryptEntityPassword(password string, secretKey string) (string, error) {
 
 	ciphertext, err := base64.StdEncoding.DecodeString(password)

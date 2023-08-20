@@ -21,6 +21,11 @@ const (
 	custom
 )
 
-func (e Entity) TableName() string {
+func (e *Entity) HidePassword() *Entity {
+	e.Password = ""
+	return e
+}
+
+func (e *Entity) TableName() string {
 	return "entities"
 }

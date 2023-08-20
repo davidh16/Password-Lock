@@ -127,3 +127,16 @@ func (c Controller) GetEntity(ctx *gin.Context) {
 	ctx.JSON(200, entity)
 
 }
+
+func (c Controller) ListEntities(ctx *gin.Context) {
+	entities, err := c.service.ListEntities(ctx)
+	if err != nil {
+		SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(200, entities)
+}

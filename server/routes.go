@@ -15,4 +15,5 @@ func initializeRoutes(r *gin.Engine, ctrl *controller.Controller) {
 	r.POST("/entity", ctrl.CreateEntity)
 	r.POST("/entity/delete/:entity_uuid", ctrl.DeleteEntity)
 	r.POST("/entity/:entity_uuid", ctrl.GetEntity)
+	r.GET("/entity/list", ctrl.ListEntities)
 }
