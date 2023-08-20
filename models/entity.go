@@ -1,15 +1,15 @@
 package models
 
 type Entity struct {
-	Name         string  `json:"name"`
-	EmailAddress *string `json:"email_address"`
-	Username     *string `json:"username"`
-	Password     string  `json:"password"`
-	IconPath     *string `json:"icon_path"`
-	Description  *string `json:"description"`
-	Type         int     `json:"type"`
-	UserUuid     string  `json:"user_uuid"`
-	SecretKey    string  `json:"secret_key" gorm:"-"`
+	Name         string  `json:"name,omitempty"`
+	EmailAddress *string `json:"email_address,omitempty"`
+	Username     *string `json:"username,omitempty"`
+	Password     string  `json:"password,omitempty"`
+	IconPath     *string `json:"icon_path,omitempty"`
+	Description  *string `json:"description,omitempty"`
+	Type         int     `json:"type,omitempty"`
+	UserUuid     string  `json:"user_uuid,omitempty"`
+	SecretKey    string  `json:"secret_key,omitempty" gorm:"-"`
 }
 
 const (

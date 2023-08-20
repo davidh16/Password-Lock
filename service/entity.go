@@ -4,6 +4,8 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/base64"
+	"fmt"
+	"github.com/gin-gonic/gin"
 	"password-lock/models"
 )
 
@@ -56,4 +58,59 @@ func (s Service) DeleteEntity(entityUuid string) error {
 		return result.Error
 	}
 	return nil
+}
+
+func (s Service) GetEntityByUuid(ctx *gin.Context, entityUuid string, secretKey string) (*models.Entity, error) {
+
+	loggedInUser := s.Me(ctx)
+
+	var entity models.Entity
+	result := s.entityRepository.Db().Where("uuid=? AND user_uuid=?", entityUuid, loggedInUser).First(&entity)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	decryptedPassword, err := decryptEntityPassword(entity.Password, secretKey)
+	if err != nil {
+		return nil, err
+	}
+
+	entity.Password = decryptedPassword
+
+	return &entity, nil
+}
+
+func decryptEntityPassword(password string, secretKey string) (string, error) {
+
+	ciphertext, err := base64.StdEncoding.DecodeString(password)
+	if err != nil {
+		return "", err
+	}
+
+	key := []byte(secretKey)
+
+	c, err := aes.NewCipher(key)
+	if err != nil {
+		return "", err
+	}
+
+	gcm, err := cipher.NewGCM(c)
+	if err != nil {
+		return "", err
+	}
+
+	nonceSize := gcm.NonceSize()
+	if len(ciphertext) < nonceSize {
+		return "", fmt.Errorf("ciphertext too short")
+	}
+
+	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
+
+	decryptedPassword, err := gcm.Open(nil, nonce, ciphertext, nil)
+	if err != nil {
+		return "", err
+	}
+
+	return string(decryptedPassword), nil
+
 }

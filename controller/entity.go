@@ -43,17 +43,7 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 	}
 
 	entity.Password = c.service.EncryptPassword(entity.SecretKey, entity.Password)
-
-	loggedUserUuid, err := ctx.Cookie("session")
-	if err != nil {
-		SendResponse(ctx, Response{
-			Status: http.StatusUnauthorized,
-			Error:  err.Error(),
-		})
-		return
-	}
-
-	entity.UserUuid = loggedUserUuid
+	entity.UserUuid = c.service.Me(ctx)
 
 	_, err = c.service.CreateEntity(entity)
 	if err != nil {
@@ -107,5 +97,33 @@ func (c Controller) DeleteEntity(ctx *gin.Context) {
 		Message: "entity successfully deleted",
 	})
 	return
+
+}
+
+func (c Controller) GetEntity(ctx *gin.Context) {
+	var request struct {
+		SecretKey string `json:"secret_key"`
+	}
+
+	// decoding json message to user model
+	err := json.NewDecoder(ctx.Request.Body).Decode(&request)
+	if err != nil {
+		SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	entity, err := c.service.GetEntityByUuid(ctx, ctx.Param("entity_uuid"), request.SecretKey)
+	if err != nil {
+		SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(200, entity)
 
 }
