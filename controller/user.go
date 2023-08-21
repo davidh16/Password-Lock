@@ -15,7 +15,7 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 	// decoding json message to user model
 	err := json.NewDecoder(ctx.Request.Body).Decode(&user)
 	if err != nil {
-		SendResponse(ctx, Response{
+		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
 		})
@@ -24,7 +24,7 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 
 	_, err = c.service.RegisterUser(user)
 	if err != nil {
-		SendResponse(ctx, Response{
+		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
 		})
@@ -33,7 +33,7 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 
 	secretKey, err := utils.GenerateRandomStringURLSafe()
 	if err != nil {
-		SendResponse(ctx, Response{
+		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
 		})
@@ -42,14 +42,14 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 
 	err = service.SendEmail(user.EmailAddress, secretKey)
 	if err != nil {
-		SendResponse(ctx, Response{
+		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
 		})
 		return
 	}
 
-	SendResponse(ctx, Response{
+	c.SendResponse(ctx, Response{
 		Status:  http.StatusCreated,
 		Message: "user registered successfully",
 	})
@@ -64,7 +64,7 @@ func (c Controller) Login(ctx *gin.Context) {
 	// decoding json message to user model
 	err := json.NewDecoder(ctx.Request.Body).Decode(&credentials)
 	if err != nil {
-		SendResponse(ctx, Response{
+		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
 		})
@@ -73,7 +73,7 @@ func (c Controller) Login(ctx *gin.Context) {
 
 	user, err := c.service.Authenticate(credentials)
 	if err != nil {
-		SendResponse(ctx, Response{
+		c.SendResponse(ctx, Response{
 			Status: http.StatusUnauthorized,
 			Error:  err.Error(),
 		})
@@ -82,7 +82,7 @@ func (c Controller) Login(ctx *gin.Context) {
 
 	sessionKey, err := c.service.GenerateAndSaveSessionKey(user)
 	if err != nil {
-		SendResponse(ctx, Response{
+		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
 		})
@@ -91,7 +91,7 @@ func (c Controller) Login(ctx *gin.Context) {
 
 	ctx.SetCookie("session", sessionKey, 600, "/", "", true, true)
 
-	SendResponse(ctx, Response{
+	c.SendResponse(ctx, Response{
 		Status:  http.StatusOK,
 		Message: "successfully logged in",
 	})
@@ -102,7 +102,7 @@ func (c Controller) Login(ctx *gin.Context) {
 func (c Controller) Logout(ctx *gin.Context) {
 	sessionId, err := ctx.Cookie("session")
 	if err != nil {
-		SendResponse(ctx, Response{
+		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
 		})
@@ -113,7 +113,7 @@ func (c Controller) Logout(ctx *gin.Context) {
 
 	ctx.SetCookie("session", "", -1, "/", "", true, true)
 
-	SendResponse(ctx, Response{
+	c.SendResponse(ctx, Response{
 		Status:  http.StatusOK,
 		Message: "successfully logged out",
 	})

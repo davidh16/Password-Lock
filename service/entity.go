@@ -29,17 +29,10 @@ func (s Service) EncryptPassword(secretKey string, password string) string {
 }
 
 func (s Service) GetEntityIconPath(entityType int) string {
-	switch entityType {
-	case 0:
-		return "/Users/davidhorvat/GolandProjects/Password-lock/logos/github.png"
-	case 1:
-		return "/Users/davidhorvat/GolandProjects/Password-lock/logos/facebook.png"
-	case 2:
-		return "/Users/davidhorvat/GolandProjects/Password-lock/logos/gmail.png"
-	case 3:
-		return "/Users/davidhorvat/GolandProjects/Password-lock/logos/linkedin.png"
-	case 4:
-		return "/Users/davidhorvat/GolandProjects/Password-lock/logos/instagram.png"
+
+	iconType := models.TypeMap[entityType]
+	if iconType != "custom" {
+		return fmt.Sprintf("/Users/davidhorvat/GolandProjects/Password-lock/logos/%s", iconType)
 	}
 	return ""
 }
@@ -50,6 +43,23 @@ func (s Service) CreateEntity(entity models.Entity) (*models.Entity, error) {
 		return nil, result.Error
 	}
 	return &entity, nil
+}
+
+func (s Service) UpdateEntity(updatedEntity *models.Entity) error {
+	var entity models.Entity
+	result := s.entityRepository.Db().Where("uuid=?", updatedEntity.Uuid).First(&entity)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	entity.Merge(updatedEntity)
+
+	result = s.entityRepository.Db().Where("uuid=?", updatedEntity.Uuid).Save(&entity)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
 }
 
 func (s Service) DeleteEntity(entityUuid string) error {

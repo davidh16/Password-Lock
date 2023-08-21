@@ -13,6 +13,7 @@ func initializeRoutes(r *gin.Engine, ctrl *controller.Controller) {
 
 	// entity routes
 	r.POST("/entity", ctrl.CreateEntity)
+	r.POST("/entity/update", ctrl.UpdateEntity)
 	r.POST("/entity/delete/:entity_uuid", ctrl.DeleteEntity)
 	r.POST("/entity/:entity_uuid", ctrl.GetEntity)
 	r.GET("/entity/list", ctrl.ListEntities)

@@ -21,10 +21,10 @@ type Response struct {
 	Error   string
 }
 
-func SendResponse(c *gin.Context, response Response) {
+func (c Controller) SendResponse(ctx *gin.Context, response Response) {
 	if len(response.Message) > 0 {
-		c.JSON(response.Status, map[string]interface{}{"message": response.Message})
+		ctx.JSON(response.Status, map[string]interface{}{"message": response.Message})
 	} else if len(response.Error) > 0 {
-		c.JSON(response.Status, map[string]interface{}{"error": response.Error})
+		ctx.JSON(response.Status, map[string]interface{}{"error": response.Error})
 	}
 }
