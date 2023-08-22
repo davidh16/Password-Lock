@@ -12,3 +12,4 @@ CREATE TABLE IF NOT EXISTS entities (
     type int,
     user_uuid uuid REFERENCES users(uuid)
 );
+

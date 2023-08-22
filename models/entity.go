@@ -1,7 +1,7 @@
 package models
 
 type Entity struct {
-	Uuid         string  `json:"uuid,omitempty"`
+	Uuid         string  `json:"uuid" gorm:"unique;type:uuid; column:uuid;default:uuid_generate_v4()"`
 	Name         string  `json:"name,omitempty"`
 	EmailAddress *string `json:"email_address,omitempty"`
 	Username     *string `json:"username,omitempty"`

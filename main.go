@@ -28,7 +28,7 @@ func main() {
 	ctrl := controller.NewController(svc)
 	r := gin.Default()
 
-	srv := server.NewServer(r, ctrl)
+	srv := server.NewServer(r, ctrl, redis)
 
 	// Listen and Server in 0.0.0.0:8080
 	srv.Run(":8080")

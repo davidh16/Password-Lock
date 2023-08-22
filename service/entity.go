@@ -28,6 +28,7 @@ func (s Service) EncryptPassword(secretKey string, password string) string {
 	return base64.StdEncoding.EncodeToString(encryptedPassowrd)
 }
 
+// TODO refactor to get path of cloud storage
 func (s Service) GetEntityIconPath(entityType int) string {
 
 	iconType := models.TypeMap[entityType]
