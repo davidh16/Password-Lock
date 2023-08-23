@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"password-lock/models"
+	"strings"
 )
 
 func (s Service) EncryptPassword(secretKey string, password string) string {
@@ -33,13 +34,13 @@ func (s Service) GetEntityIconPath(entityType int) string {
 
 	iconType := models.TypeMap[entityType]
 	if iconType != "custom" {
-		return fmt.Sprintf("/Users/davidhorvat/GolandProjects/Password-lock/logos/%s", iconType)
+		return strings.Join([]string{"default", iconType}, "/")
 	}
 	return ""
 }
 
 func (s Service) CreateEntity(entity models.Entity) (*models.Entity, error) {
-	result := s.entityRepository.Db().Create(entity)
+	result := s.entityRepository.Db().Create(&entity)
 	if result.Error != nil {
 		return nil, result.Error
 	}

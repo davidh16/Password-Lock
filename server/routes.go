@@ -18,4 +18,5 @@ func initializeRoutes(r *gin.Engine, ctrl *controller.Controller, m *middleware.
 	r.Use(m.AuthMiddleware()).POST("/entity/delete/:entity_uuid", ctrl.DeleteEntity)
 	r.Use(m.AuthMiddleware()).POST("/entity/:entity_uuid", ctrl.GetEntity)
 	r.Use(m.AuthMiddleware()).GET("/entity/list", ctrl.ListEntities)
+
 }

@@ -5,13 +5,14 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"password-lock/models"
+	"strings"
 )
 
 func (c Controller) CreateEntity(ctx *gin.Context) {
 	var entity models.Entity
 
 	// decoding json message to user model
-	err := json.NewDecoder(ctx.Request.Body).Decode(&entity)
+	err := json.NewDecoder(strings.NewReader(ctx.PostForm("data"))).Decode(&entity)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
@@ -36,15 +37,13 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 		return
 	}
 
-	// in the future, this will fetch icon paths from some kind of cloud storage
-	if !(entity.Type < 6 && entity.Type > 0) {
+	if entity.Type < 6 && entity.Type > 0 {
 		entity.IconPath = c.service.GetEntityIconPath(entity.Type)
 	}
-
 	entity.Password = c.service.EncryptPassword(entity.SecretKey, entity.Password)
 	entity.UserUuid = c.service.Me(ctx)
 
-	_, err = c.service.CreateEntity(entity)
+	createdEntity, err := c.service.CreateEntity(entity)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
@@ -53,6 +52,32 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 		return
 	}
 
+	if entity.Type == 6 {
+		path, err := c.service.UploadIconToBucket(ctx, createdEntity.Uuid)
+		if err != nil {
+			c.SendResponse(ctx, Response{
+				Status: http.StatusInternalServerError,
+				Error:  err.Error(),
+			})
+			return
+		}
+
+		createdEntity.IconPath = path
+		err = c.service.UpdateEntity(createdEntity)
+		if err != nil {
+			c.SendResponse(ctx, Response{
+				Status: http.StatusInternalServerError,
+				Error:  err.Error(),
+			})
+			return
+		}
+	}
+
+	c.SendResponse(ctx, Response{
+		Status:  http.StatusOK,
+		Message: "entity successfully created",
+	})
+	return
 }
 
 func (c Controller) UpdateEntity(ctx *gin.Context) {
