@@ -209,3 +209,16 @@ func (c Controller) ListEntities(ctx *gin.Context) {
 
 	ctx.JSON(200, entities)
 }
+
+func (c Controller) DownloadEntityIcon(ctx *gin.Context) {
+
+	entityUuid := ctx.Param("entity_uuid")
+
+	_, err := c.service.DownloadEntityIcon(ctx, entityUuid)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+	}
+}
