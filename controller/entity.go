@@ -9,6 +9,7 @@ import (
 )
 
 func (c Controller) CreateEntity(ctx *gin.Context) {
+
 	var entity models.Entity
 
 	// decoding json message to user model
@@ -43,7 +44,7 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 	entity.Password = c.service.EncryptPassword(entity.SecretKey, entity.Password)
 	entity.UserUuid = c.service.Me(ctx)
 
-	createdEntity, err := c.service.CreateEntity(entity)
+	createdEntity, err := c.service.CreateEntity(ctx, entity)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,

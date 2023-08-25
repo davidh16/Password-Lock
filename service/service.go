@@ -11,16 +11,13 @@ type Service struct {
 	entityRepository repository.EntityRepository
 }
 
-/* */
 func NewService(redis *redis.Client,
 	userRepo repository.UserRepository,
 	entityRepo repository.EntityRepository,
 ) Service {
-
 	return Service{
 		redis:            redis,
 		userRepository:   userRepo,
 		entityRepository: entityRepo,
 	}
-
 }

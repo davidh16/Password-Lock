@@ -29,7 +29,6 @@ func (s Service) EncryptPassword(secretKey string, password string) string {
 	return base64.StdEncoding.EncodeToString(encryptedPassowrd)
 }
 
-// TODO refactor to get path of cloud storage
 func (s Service) GetEntityIconPath(entityType int) string {
 
 	iconType := models.TypeMap[entityType]
@@ -39,15 +38,21 @@ func (s Service) GetEntityIconPath(entityType int) string {
 	return ""
 }
 
-func (s Service) CreateEntity(entity models.Entity) (*models.Entity, error) {
-	result := s.entityRepository.Db().Create(&entity)
+func (s Service) CreateEntity(ctx *gin.Context, entity models.Entity) (*models.Entity, error) {
+	tx := s.entityRepository.Db().Begin()
+	ctx.Set("tx", tx)
+
+	result := tx.Create(&entity)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	return &entity, nil
 }
 
-func (s Service) UpdateEntity(updatedEntity *models.Entity) error {
+func (s Service) UpdateEntity(ctx *gin.Context, updatedEntity *models.Entity) error {
+	tx := s.entityRepository.Db().Begin()
+	ctx.Set("tx", tx)
+
 	var entity models.Entity
 	result := s.entityRepository.Db().Where("uuid=?", updatedEntity.Uuid).First(&entity)
 	if result.Error != nil {
@@ -64,7 +69,10 @@ func (s Service) UpdateEntity(updatedEntity *models.Entity) error {
 	return nil
 }
 
-func (s Service) DeleteEntity(entityUuid string) error {
+func (s Service) DeleteEntity(ctx *gin.Context, entityUuid string) error {
+	tx := s.entityRepository.Db().Begin()
+	ctx.Set("tx", tx)
+
 	result := s.entityRepository.Db().Where("uuid=?", entityUuid).Delete(models.Entity{})
 	if result.Error != nil {
 		return result.Error

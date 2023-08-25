@@ -8,7 +8,10 @@ import (
 	"password-lock/models"
 )
 
-func (s Service) RegisterUser(user models.User) (*models.User, error) {
+func (s Service) RegisterUser(ctx *gin.Context, user models.User) (*models.User, error) {
+	tx := s.entityRepository.Db().Begin()
+	ctx.Set("tx", tx)
+
 	result := s.userRepository.Db().Table("users").Create(&user)
 	if result.Error != nil {
 		return nil, result.Error
