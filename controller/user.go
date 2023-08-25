@@ -22,7 +22,7 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 		return
 	}
 
-	_, err = c.service.RegisterUser(user)
+	_, err = c.service.RegisterUser(ctx, user)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,

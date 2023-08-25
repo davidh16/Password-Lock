@@ -64,7 +64,7 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 		}
 
 		createdEntity.IconPath = path
-		err = c.service.UpdateEntity(createdEntity)
+		err = c.service.UpdateEntity(ctx, createdEntity)
 		if err != nil {
 			c.SendResponse(ctx, Response{
 				Status: http.StatusInternalServerError,
@@ -109,7 +109,7 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 		updatedEntity.IconPath = c.service.GetEntityIconPath(updatedEntity.Type)
 	}
 
-	err = c.service.UpdateEntity(updatedEntity)
+	err = c.service.UpdateEntity(ctx, updatedEntity)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusBadRequest,
@@ -153,7 +153,7 @@ func (c Controller) DeleteEntity(ctx *gin.Context) {
 
 	entityUuid := ctx.Param("entity_uuid")
 
-	err = c.service.DeleteEntity(entityUuid)
+	err = c.service.DeleteEntity(ctx, entityUuid)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
