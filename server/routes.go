@@ -10,7 +10,7 @@ func initializeRoutes(r *gin.Engine, ctrl *controller.Controller, m *middleware.
 	// user routes
 	r.POST("/register", ctrl.RegisterUser)
 	r.POST("/login", ctrl.Login)
-	r.POST("/logout", ctrl.Logout)
+	r.Use(m.AuthMiddleware()).POST("/logout", ctrl.Logout)
 
 	// entity routes
 	r.Use(m.AuthMiddleware()).POST("/entity", ctrl.CreateEntity)
