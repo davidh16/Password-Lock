@@ -8,9 +8,9 @@ import (
 
 func ConnectToRedis() *redis.Client {
 	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379", // Redis server address and port
-		Password: "",               // Redis password, leave empty if no password is set
-		DB:       0,                // Redis database number
+		Addr:     "redis:6379", // Redis server address and port
+		Password: "",           // Redis password, leave empty if no password is set
+		DB:       0,            // Redis database number
 	})
 
 	_, err := client.Ping(context.Background()).Result()

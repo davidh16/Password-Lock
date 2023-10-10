@@ -10,6 +10,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8085:8080"
+      - "15850:2345"
   postgres:
     image: postgres
     volumes:
