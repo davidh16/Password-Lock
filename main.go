@@ -6,8 +6,6 @@ import (
 	"password-lock/repository"
 	"password-lock/server"
 	"password-lock/service"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -26,9 +24,8 @@ func main() {
 	)
 
 	ctrl := controller.NewController(svc)
-	r := gin.Default()
 
-	srv := server.NewServer(r, ctrl, redis)
+	srv := server.NewServer(ctrl, redis)
 
 	// Listen and Server in 0.0.0.0:8080
 	srv.Run(":8080")

@@ -16,8 +16,10 @@ func initializeRoutes(r *gin.Engine, ctrl *controller.Controller, m *middleware.
 	r.Use(m.AuthMiddleware()).POST("/entity", ctrl.CreateEntity)
 	r.Use(m.AuthMiddleware()).POST("/entity/update", ctrl.UpdateEntity)
 	r.Use(m.AuthMiddleware()).POST("/entity/delete/:entity_uuid", ctrl.DeleteEntity)
-	r.Use(m.AuthMiddleware()).POST("/entity/:entity_uuid", ctrl.GetEntity)
+
+	r.Use(m.AuthMiddleware()).GET("/entity/:entity_uuid", ctrl.GetEntity)
 	r.Use(m.AuthMiddleware()).GET("/entity/list", ctrl.ListEntities)
+
 	r.POST("/icon/:entity_uuid", ctrl.DownloadEntityIcon)
 
 }

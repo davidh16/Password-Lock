@@ -13,6 +13,7 @@ services:
       - "15850:2345"
   postgres:
     image: postgres
+    container_name: postgres
     volumes:
       - postgres-data:/var/lib/postgresql/data
     environment:

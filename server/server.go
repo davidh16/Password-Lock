@@ -12,13 +12,18 @@ type Server struct {
 	router     *gin.Engine
 }
 
-func NewServer(r *gin.Engine, ctrl *controller.Controller, redis *redis.Client) Server {
+func NewServer(ctrl *controller.Controller, redis *redis.Client) Server {
+
 	middleware := mw.InitializeMiddleware(redis)
-	initializeRoutes(r, ctrl, middleware)
+
+	router := gin.Default()
+	router.Use(middleware.CORSMiddleware())
+
+	initializeRoutes(router, ctrl, middleware)
 
 	return Server{
 		controller: ctrl,
-		router:     r,
+		router:     router,
 	}
 }
 

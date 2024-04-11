@@ -29,7 +29,9 @@ func (c Controller) SendResponse(ctx *gin.Context, response Response) {
 	if response.Status != 200 {
 		tx.(*gorm.DB).Rollback()
 	} else {
-		tx.(*gorm.DB).Commit()
+		if ctx.FullPath() != "/login" {
+			tx.(*gorm.DB).Commit()
+		}
 	}
 
 	if len(response.Message) > 0 {
