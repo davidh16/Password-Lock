@@ -9,6 +9,7 @@ import (
 func initializeRoutes(r *gin.Engine, ctrl *controller.Controller, m *middleware.Middleware) {
 	// user routes
 	r.POST("/register", ctrl.RegisterUser)
+	r.POST("/verify", ctrl.VerifyAccount)
 	r.POST("/login", ctrl.Login)
 	r.Use(m.AuthMiddleware()).POST("/logout", ctrl.Logout)
 

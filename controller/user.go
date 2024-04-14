@@ -2,18 +2,23 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"password-lock/models"
-	"password-lock/service"
 	"password-lock/utils"
+	"time"
 )
 
 func (c Controller) RegisterUser(ctx *gin.Context) {
-	var user models.User
+
+	var registerRequest struct {
+		EmailAddress string `json:"email_address"`
+	}
 
 	// decoding json message to user model
-	err := json.NewDecoder(ctx.Request.Body).Decode(&user)
+	err := json.NewDecoder(ctx.Request.Body).Decode(&registerRequest)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
@@ -22,7 +27,7 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 		return
 	}
 
-	_, err = c.service.RegisterUser(ctx, user)
+	err, exists := c.service.IfEmailAddressExists(registerRequest.EmailAddress)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
@@ -31,7 +36,19 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 		return
 	}
 
-	secretKey, err := utils.GenerateRandomStringURLSafe()
+	if exists {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusBadRequest,
+			Error:  errors.New("email address already exists").Error(),
+		})
+		return
+	}
+
+	user := &models.User{
+		EmailAddress: registerRequest.EmailAddress,
+	}
+
+	user, err = c.service.RegisterUser(ctx, user)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
@@ -40,12 +57,19 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 		return
 	}
 
-	err = service.SendEmail(user.EmailAddress, secretKey)
+	//todo generate verification token
+	verificationToken, err := c.service.CreateToken(ctx, user.Uuid, "verification")
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
 		})
+		return
+	}
+
+	err = c.service.SendVerificationLinkEmail(user.EmailAddress, verificationToken.Token)
+	if err != nil {
+		log.Println("failed to send an email")
 		return
 	}
 
@@ -57,6 +81,82 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 
 }
 
+func (c Controller) VerifyAccount(ctx *gin.Context) {
+
+	var verifyAccountRequest struct {
+		VerificationToken string `json:"verification_token"`
+	}
+
+	// decoding json message to user model
+	err := json.NewDecoder(ctx.Request.Body).Decode(&verifyAccountRequest)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	token, err := c.service.GetToken(verifyAccountRequest.VerificationToken)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	if token.IsUsed != nil || token.ExpireAt.Before(time.Now()) {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusBadRequest,
+			Error:  errors.New("invalid token").Error(),
+		})
+		return
+	}
+
+	password, err := utils.GenerateRandomStringURLSafe()
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	user, err := c.service.VerifyUser(ctx, token.UserUuid, password)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	_, err = c.service.UpdateToken(ctx, token)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	err = c.service.SendAccountVerifiedEmail(user.EmailAddress, password)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	c.SendResponse(ctx, Response{
+		Status:  http.StatusOK,
+		Message: "user successfully verified",
+	})
+	return
+}
+
 func (c Controller) Login(ctx *gin.Context) {
 
 	var credentials models.User
@@ -65,7 +165,7 @@ func (c Controller) Login(ctx *gin.Context) {
 	err := json.NewDecoder(ctx.Request.Body).Decode(&credentials)
 	if err != nil {
 		c.SendResponse(ctx, Response{
-			Status: http.StatusInternalServerError,
+			Status: http.StatusUnauthorized,
 			Error:  err.Error(),
 		})
 		return

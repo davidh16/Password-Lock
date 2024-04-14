@@ -5,14 +5,44 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
+	"gorm.io/gorm"
 	"password-lock/models"
 )
 
-func (s Service) RegisterUser(ctx *gin.Context, user models.User) (*models.User, error) {
-	tx := s.entityRepository.Db().Begin()
-	ctx.Set("tx", tx)
+func (s Service) RegisterUser(ctx *gin.Context, user *models.User) (*models.User, error) {
 
-	result := s.userRepository.Db().Table("users").Create(&user)
+	tx := s.userRepository.Db().Begin()
+	err := setTransaction(ctx, []*gorm.DB{tx})
+	if err != nil {
+		return nil, err
+	}
+
+	result := tx.Table("users").Create(user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return user, nil
+}
+
+func (s Service) VerifyUser(ctx *gin.Context, userUuid string, password string) (*models.User, error) {
+
+	tx := s.userRepository.Db().Begin()
+	err := setTransaction(ctx, []*gorm.DB{tx})
+	if err != nil {
+		return nil, err
+	}
+
+	var user models.User
+	result := tx.Where("uuid=? AND active = FALSE", userUuid).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	user.Active = true
+	user.Password = password
+
+	result = tx.Table("users").Where("uuid=? AND active = FALSE", userUuid).Save(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -21,7 +51,7 @@ func (s Service) RegisterUser(ctx *gin.Context, user models.User) (*models.User,
 }
 
 func (s Service) Authenticate(credentials models.User) (*models.User, error) {
-	user, err := s.userRepository.FindUserByEmailAddress(credentials)
+	user, err := s.userRepository.FindUserByEmailAddress(credentials.EmailAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -68,4 +98,20 @@ func (s Service) Me(ctx *gin.Context) string {
 	}
 
 	return loggedInUser
+}
+
+func (s Service) IfEmailAddressExists(emailAddress string) (error, bool) {
+	user, err := s.userRepository.FindUserByEmailAddress(emailAddress)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, false
+		} else {
+			return err, false
+		}
+	}
+	if user != nil {
+		return nil, true
+	} else {
+		return nil, false
+	}
 }

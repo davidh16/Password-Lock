@@ -7,7 +7,7 @@ import (
 
 type UserRepository interface {
 	Db() *gorm.DB
-	FindUserByEmailAddress(user models.User) (*models.User, error)
+	FindUserByEmailAddress(emailAddress string) (*models.User, error)
 	FindUserByUuid(userUuid string) (*models.User, error)
 }
 
@@ -25,13 +25,13 @@ func (r userRepository) Db() *gorm.DB {
 	return r.db
 }
 
-func (r userRepository) FindUserByEmailAddress(user models.User) (*models.User, error) {
-	var foundUser models.User
-	result := r.db.Where("email_address = ?", user.EmailAddress).First(&foundUser)
+func (r userRepository) FindUserByEmailAddress(emailAddress string) (*models.User, error) {
+	var user models.User
+	result := r.db.Where("email_address = ? AND active = TRUE", emailAddress).First(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
-	return &foundUser, nil
+	return &user, nil
 }
 
 func (r userRepository) FindUserByUuid(userUuid string) (*models.User, error) {

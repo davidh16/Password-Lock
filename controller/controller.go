@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"password-lock/service"
@@ -24,13 +25,20 @@ type Response struct {
 
 func (c Controller) SendResponse(ctx *gin.Context, response Response) {
 
-	tx, _ := ctx.Get("tx")
+	xxx, _ := ctx.Get("tx")
+	transactions, _ := xxx.([]*gorm.DB)
 
-	if response.Status != 200 {
-		tx.(*gorm.DB).Rollback()
-	} else {
-		if ctx.FullPath() != "/login" {
-			tx.(*gorm.DB).Commit()
+	fmt.Println(len(transactions))
+
+	if len(transactions) > 0 {
+		if response.Error != "" {
+			for _, tx := range transactions {
+				tx.Rollback()
+			}
+		} else {
+			for _, tx := range transactions {
+				tx.Commit()
+			}
 		}
 	}
 
