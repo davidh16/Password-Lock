@@ -35,6 +35,20 @@ func (s Service) SendVerificationLinkEmail(emailAddress string, token string) er
 	return nil
 }
 
+func (s Service) SendNewPasswordEmail(emailAddress string, token string) error {
+	messageText := "\nThis is your new password token : " + token
+	// Message.
+	message := []byte("Subject: Password Locker new password token\r\n" + messageText)
+
+	err := s.sendEmail(emailAddress, message)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Email Sent Successfully!")
+	return nil
+}
+
 func (s Service) SendPasswordResetLinkEmail(emailAddress string, token string) error {
 	return nil
 }

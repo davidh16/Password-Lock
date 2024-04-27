@@ -17,22 +17,16 @@ func (s Service) CreateToken(ctx *gin.Context, userUuid string, tokenType string
 	}
 
 	expireTime := time.Now().Add(models.DefaultTokenExpireTime)
-	if tokenType == "forgot_password" {
+	if tokenType == models.TOKEN_TYPE_FORGOT_PASSWORD {
 		expireTime = time.Now().Add(models.DefaultTokenExpireTime)
 	}
-	if tokenType == "verification" {
+	if tokenType == models.TOKEN_TYPE_VERIFICATION {
 		expireTime = time.Now().Add(time.Hour * 168)
 	}
 
 	token.ExpireAt = expireTime
 
-	tx := s.entityRepository.Db().Begin()
-	err := setTransaction(ctx, []*gorm.DB{tx})
-	if err != nil {
-		return nil, err
-	}
-
-	result := tx.Create(&token)
+	result := s.tokenRepository.Db().Create(&token)
 	if result.Error != nil {
 		return nil, result.Error
 	}

@@ -42,7 +42,10 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 		entity.IconPath = c.service.GetEntityIconPath(entity.Type)
 	}
 	entity.Password = c.service.EncryptPassword(entity.SecretKey, entity.Password)
-	entity.UserUuid = c.service.Me(ctx)
+
+	me := ctx.Value("me").(string)
+
+	entity.UserUuid = me
 
 	createdEntity, err := c.service.CreateEntity(ctx, entity)
 	if err != nil {
@@ -141,8 +144,10 @@ func (c Controller) DeleteEntity(ctx *gin.Context) {
 		return
 	}
 
+	me := ctx.Value("me").(string)
+
 	// checking if user has permission to delete an entity
-	err = c.service.Authorize(c.service.Me(ctx), request.LoginPassword)
+	err = c.service.Authorize(me, request.LoginPassword)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusUnauthorized,

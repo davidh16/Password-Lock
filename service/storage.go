@@ -49,7 +49,9 @@ func (s Service) UploadIconToBucket(ctx *gin.Context, entityUuid string) (string
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
-	path := strings.Join([]string{s.Me(ctx), entityUuid}, "/")
+	me := ctx.Value("me").(string)
+
+	path := strings.Join([]string{me, entityUuid}, "/")
 
 	object := storageRef.Object(path)
 
@@ -89,7 +91,9 @@ func (s Service) DownloadEntityIcon(ctx *gin.Context, entityUuid string) ([]byte
 		return nil, err
 	}
 
-	path := strings.Join([]string{s.Me(ctx), entityUuid}, "/")
+	me := ctx.Value("me").(string)
+
+	path := strings.Join([]string{me, entityUuid}, "/")
 
 	object := storageRef.Object(path)
 	if err != nil {

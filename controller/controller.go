@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"password-lock/service"
@@ -27,8 +26,6 @@ func (c Controller) SendResponse(ctx *gin.Context, response Response) {
 
 	xxx, _ := ctx.Get("tx")
 	transactions, _ := xxx.([]*gorm.DB)
-
-	fmt.Println(len(transactions))
 
 	if len(transactions) > 0 {
 		if response.Error != "" {

@@ -14,12 +14,12 @@ type Server struct {
 
 func NewServer(ctrl *controller.Controller, redis *redis.Client) Server {
 
-	middleware := mw.InitializeMiddleware(redis)
+	authMw := mw.InitializeAuthMiddleware(redis)
+	_ = mw.InitializeCORSMiddleware(redis)
 
 	router := gin.Default()
-	router.Use(middleware.CORSMiddleware())
 
-	initializeRoutes(router, ctrl, middleware)
+	initializeRoutes(router, ctrl, authMw)
 
 	return Server{
 		controller: ctrl,

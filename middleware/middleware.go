@@ -7,17 +7,28 @@ import (
 	"net/http"
 )
 
-type Middleware struct {
+//type Middleware struct {
+//	CORSMiddleware CORSMiddleware
+//	AuthMiddleware AuthMiddleware
+//}
+
+type CORSMiddleware struct{}
+
+type AuthMiddleware struct {
 	redis *redis.Client
 }
 
-func InitializeMiddleware(redis *redis.Client) *Middleware {
-	return &Middleware{
+func InitializeAuthMiddleware(redis *redis.Client) *AuthMiddleware {
+	return &AuthMiddleware{
 		redis: redis,
 	}
 }
 
-func (m *Middleware) AuthMiddleware() gin.HandlerFunc {
+func InitializeCORSMiddleware(redis *redis.Client) *CORSMiddleware {
+	return &CORSMiddleware{}
+}
+
+func (m *AuthMiddleware) AuthMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		sessionUuid, err := ctx.Cookie("session")
 		if err != nil {
@@ -35,13 +46,14 @@ func (m *Middleware) AuthMiddleware() gin.HandlerFunc {
 			ctx.AbortWithStatus(http.StatusProxyAuthRequired)
 			return
 		} else {
+			ctx.Set("me", loggedInUser)
 			ctx.Next()
 			return
 		}
 	}
 }
 
-func (m *Middleware) CORSMiddleware() gin.HandlerFunc {
+func (m *CORSMiddleware) CORSMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
@@ -52,7 +64,5 @@ func (m *Middleware) CORSMiddleware() gin.HandlerFunc {
 			c.AbortWithStatus(204)
 			return
 		}
-
-		c.Next()
 	}
 }

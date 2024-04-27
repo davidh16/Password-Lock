@@ -1,7 +1,6 @@
 package service
 
 import (
-	"context"
 	"errors"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -11,13 +10,7 @@ import (
 
 func (s Service) RegisterUser(ctx *gin.Context, user *models.User) (*models.User, error) {
 
-	tx := s.userRepository.Db().Begin()
-	err := setTransaction(ctx, []*gorm.DB{tx})
-	if err != nil {
-		return nil, err
-	}
-
-	result := tx.Table("users").Create(user)
+	result := s.userRepository.Db().Table("users").Create(user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -27,14 +20,8 @@ func (s Service) RegisterUser(ctx *gin.Context, user *models.User) (*models.User
 
 func (s Service) VerifyUser(ctx *gin.Context, userUuid string, password string) (*models.User, error) {
 
-	tx := s.userRepository.Db().Begin()
-	err := setTransaction(ctx, []*gorm.DB{tx})
-	if err != nil {
-		return nil, err
-	}
-
 	var user models.User
-	result := tx.Where("uuid=? AND active = FALSE", userUuid).First(&user)
+	result := s.userRepository.Db().Where("uuid=? AND active = FALSE", userUuid).First(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -42,12 +29,33 @@ func (s Service) VerifyUser(ctx *gin.Context, userUuid string, password string) 
 	user.Active = true
 	user.Password = password
 
-	result = tx.Table("users").Where("uuid=? AND active = FALSE", userUuid).Save(&user)
+	result = s.userRepository.Db().Set("encrypt-password", true).Table("users").Where("uuid=? AND active = FALSE", userUuid).Save(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
 	return &user, nil
+}
+
+func (s Service) CompleteRegistration(ctx *gin.Context, user *models.User, personalQuestions []*models.UserPersonalQuestion) (*models.User, error) {
+
+	tx := s.userRepository.Db().Begin()
+	err := setTransaction(ctx, []*gorm.DB{tx})
+	if err != nil {
+		return nil, err
+	}
+
+	result := tx.Table("users").Where("uuid=? AND active = TRUE AND completed = FALSE", user.Uuid).Save(user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	result = tx.Table("user_personal_questions").Create(personalQuestions)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return user, nil
 }
 
 func (s Service) Authenticate(credentials models.User) (*models.User, error) {
@@ -86,18 +94,19 @@ func (s Service) Authorize(userUuid string, password string) error {
 	return err
 }
 
-func (s Service) Me(ctx *gin.Context) string {
-	sessionUuid, err := ctx.Cookie("session")
+func (s Service) Me(ctx *gin.Context) (*models.User, error) {
+
+	//me, err := s.userRepository.FindUserByUuid(ctx.Value("me").(string))
+	//if err != nil {
+	//	return nil, err
+	//}
+
+	me, err := s.userRepository.FindUserByUuid("3174f700-389a-4cf0-8636-8c520145baf5")
 	if err != nil {
-		return ""
+		return nil, err
 	}
 
-	loggedInUser, err := s.redis.Get(context.Background(), sessionUuid).Result()
-	if err != nil {
-		return ""
-	}
-
-	return loggedInUser
+	return me, nil
 }
 
 func (s Service) IfEmailAddressExists(emailAddress string) (error, bool) {
@@ -114,4 +123,12 @@ func (s Service) IfEmailAddressExists(emailAddress string) (error, bool) {
 	} else {
 		return nil, false
 	}
+}
+
+func (s Service) GetUserByEmailAddress(emailAddress string) (*models.User, error) {
+	user, err := s.userRepository.FindUserByEmailAddress(emailAddress)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
 }

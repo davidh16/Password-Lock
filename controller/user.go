@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"password-lock/models"
 	"password-lock/utils"
+	"password-lock/validations"
 	"time"
 )
 
@@ -57,8 +58,7 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 		return
 	}
 
-	//todo generate verification token
-	verificationToken, err := c.service.CreateToken(ctx, user.Uuid, "verification")
+	verificationToken, err := c.service.CreateToken(ctx, user.Uuid, models.TOKEN_TYPE_VERIFICATION)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
@@ -83,21 +83,9 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 
 func (c Controller) VerifyAccount(ctx *gin.Context) {
 
-	var verifyAccountRequest struct {
-		VerificationToken string `json:"verification_token"`
-	}
+	tokenString := ctx.Query("token")
 
-	// decoding json message to user model
-	err := json.NewDecoder(ctx.Request.Body).Decode(&verifyAccountRequest)
-	if err != nil {
-		c.SendResponse(ctx, Response{
-			Status: http.StatusInternalServerError,
-			Error:  err.Error(),
-		})
-		return
-	}
-
-	token, err := c.service.GetToken(verifyAccountRequest.VerificationToken)
+	token, err := c.service.GetToken(tokenString)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
@@ -153,6 +141,64 @@ func (c Controller) VerifyAccount(ctx *gin.Context) {
 	c.SendResponse(ctx, Response{
 		Status:  http.StatusOK,
 		Message: "user successfully verified",
+	})
+	return
+}
+
+func (c Controller) CompleteRegistration(ctx *gin.Context) {
+	me, err := c.service.Me(ctx)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	if me.Completed {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusBadRequest,
+			Error:  errors.New("registration already completed").Error(),
+		})
+		return
+	}
+
+	var userPersonalQuestions []*models.UserPersonalQuestion
+	err = json.NewDecoder(ctx.Request.Body).Decode(&userPersonalQuestions)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	for i, _ := range userPersonalQuestions {
+		userPersonalQuestions[i].UserUuid = me.Uuid
+	}
+
+	if !validations.IsCompleteRegistrationRequestValid(userPersonalQuestions) {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusBadRequest,
+			Error:  errors.New("all fields must be populated").Error(),
+		})
+		return
+	}
+
+	me.Completed = true
+
+	_, err = c.service.CompleteRegistration(ctx, me, userPersonalQuestions)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	c.SendResponse(ctx, Response{
+		Status:  http.StatusOK,
+		Message: "registration completed successfully",
 	})
 	return
 }
@@ -217,5 +263,78 @@ func (c Controller) Logout(ctx *gin.Context) {
 		Status:  http.StatusOK,
 		Message: "successfully logged out",
 	})
+	return
+}
+
+func (c Controller) Me(ctx *gin.Context) {
+
+}
+
+func (c Controller) ForgotPassword(ctx *gin.Context) {
+	var forgotPasswordRequest struct {
+		EmailAddress string `json:"email_address"`
+	}
+
+	// decoding json message to user model
+	err := json.NewDecoder(ctx.Request.Body).Decode(&forgotPasswordRequest)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusUnauthorized,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	// if user is not found, we can not return that information because of security issues
+	user, err := c.service.GetUserByEmailAddress(forgotPasswordRequest.EmailAddress)
+	if err != nil {
+		return
+	}
+
+	token, err := c.service.CreateToken(ctx, user.Uuid, models.TOKEN_TYPE_FORGOT_PASSWORD)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	err = c.service.SendNewPasswordEmail(user.EmailAddress, token.Token)
+	if err != nil {
+		log.Println("failed to send an email")
+		return
+	}
+
+	c.SendResponse(ctx, Response{
+		Status: http.StatusOK,
+	})
+	return
+}
+
+func (c Controller) GetSecurityQuestionsByToken(ctx *gin.Context) {
+	t := ctx.Query("token")
+
+	token, err := c.service.GetToken(t)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+	}
+
+	if token == nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusForbidden,
+		})
+	}
+
+	if token.IsUsed != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusForbidden,
+		})
+	}
+
+	ctx.JSON(http.StatusOK, token.User.PersonalQuestions)
 	return
 }

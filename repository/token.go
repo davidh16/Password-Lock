@@ -26,7 +26,7 @@ func (r tokenRepository) Db() *gorm.DB {
 
 func (r tokenRepository) FindTokenByToken(token string) (*models.Token, error) {
 	var tokenModel models.Token
-	result := r.db.Where("token=?", token).First(&tokenModel)
+	result := r.db.Where("token=?", token).Preload("User.PersonalQuestions.PersonalQuestion").First(&tokenModel)
 	if result.Error != nil {
 		return nil, result.Error
 	}

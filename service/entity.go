@@ -92,10 +92,10 @@ func (s Service) DeleteEntity(ctx *gin.Context, entityUuid string) error {
 
 func (s Service) GetEntityByUuid(ctx *gin.Context, entityUuid string, secretKey string) (*models.Entity, error) {
 
-	loggedInUser := s.Me(ctx)
+	me := ctx.Value("me").(string)
 
 	var entity models.Entity
-	result := s.entityRepository.Db().Where("uuid=? AND user_uuid=?", entityUuid, loggedInUser).First(&entity)
+	result := s.entityRepository.Db().Where("uuid=? AND user_uuid=?", entityUuid, me).First(&entity)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -112,7 +112,8 @@ func (s Service) GetEntityByUuid(ctx *gin.Context, entityUuid string, secretKey 
 
 func (s Service) ListEntities(ctx *gin.Context) ([]models.Entity, error) {
 	var entities []models.Entity
-	result := s.entityRepository.Db().Where("user_uuid=?", s.Me(ctx)).Find(&entities)
+	me := ctx.Value("me").(string)
+	result := s.entityRepository.Db().Where("user_uuid=?", me).Find(&entities)
 	if result.Error != nil {
 		return nil, result.Error
 	}

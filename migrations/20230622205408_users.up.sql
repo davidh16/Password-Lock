@@ -5,7 +5,8 @@ CREATE TABLE IF NOT EXISTS users (
     -- extras
      email_address varchar,
      password varchar,
-     active boolean
+     active boolean,
+     completed boolean
 );
 
 CREATE UNIQUE INDEX users_unique_email_address on users(email_address) where active is true;
