@@ -8,6 +8,7 @@ import (
 type UserRepository interface {
 	Db() *gorm.DB
 	FindUserByEmailAddress(emailAddress string) (*models.User, error)
+	FindUnverifiedUserByEmailAddress(emailAddress string) (*models.User, error)
 	FindUserByUuid(userUuid string) (*models.User, error)
 }
 
@@ -28,6 +29,14 @@ func (r userRepository) Db() *gorm.DB {
 func (r userRepository) FindUserByEmailAddress(emailAddress string) (*models.User, error) {
 	var user models.User
 	result := r.db.Where("email_address = ? AND active = TRUE", emailAddress).First(&user)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &user, nil
+}
+func (r userRepository) FindUnverifiedUserByEmailAddress(emailAddress string) (*models.User, error) {
+	var user models.User
+	result := r.db.Where("email_address = ? AND active = false", emailAddress).First(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}

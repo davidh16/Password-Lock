@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"log"
 	"net/http"
 	"password-lock/models"
@@ -141,6 +142,57 @@ func (c Controller) VerifyAccount(ctx *gin.Context) {
 	c.SendResponse(ctx, Response{
 		Status:  http.StatusOK,
 		Message: "user successfully verified",
+	})
+	return
+}
+
+func (c Controller) ResendVerificationEmail(ctx *gin.Context) {
+	var resendVerificationEmailRequest struct {
+		EmailAddress string `json:"email_address"`
+	}
+
+	err := json.NewDecoder(ctx.Request.Body).Decode(&resendVerificationEmailRequest)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+		})
+		return
+	}
+
+	user, err := c.service.GetUserByEmailAddress(resendVerificationEmailRequest.EmailAddress)
+	if err != nil {
+		if !errors.Is(err, gorm.ErrRecordNotFound) {
+			c.SendResponse(ctx, Response{
+				Status: http.StatusInternalServerError,
+			})
+			return
+		}
+	}
+
+	user, err = c.service.GetUnverifiedUserByEmailAddress(resendVerificationEmailRequest.EmailAddress)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+		})
+		return
+	}
+
+	token, err := c.service.CreateToken(ctx, user.Uuid, models.TOKEN_TYPE_VERIFICATION)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+		})
+		return
+	}
+
+	err = c.service.SendVerificationLinkEmail(user.EmailAddress, token.Token)
+	if err != nil {
+		log.Println("failed to send an email")
+		return
+	}
+
+	c.SendResponse(ctx, Response{
+		Status: http.StatusOK,
 	})
 	return
 }

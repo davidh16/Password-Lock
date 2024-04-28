@@ -139,3 +139,11 @@ func (s Service) GetUserByEmailAddress(emailAddress string) (*models.User, error
 	}
 	return user, nil
 }
+
+func (s Service) GetUnverifiedUserByEmailAddress(emailAddress string) (*models.User, error) {
+	user, err := s.userRepository.FindUnverifiedUserByEmailAddress(emailAddress)
+	if err != nil {
+		return nil, err
+	}
+	return user, nil
+}
