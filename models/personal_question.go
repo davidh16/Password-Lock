@@ -8,7 +8,7 @@ type PersonalQuestion struct {
 }
 
 type UserPersonalQuestion struct {
-	PersonalQuestion     PersonalQuestion `gorm:"foreignKey:PersonalQuestionUuid;references:Uuid"`
+	PersonalQuestion     PersonalQuestion `gorm:"foreignKey:PersonalQuestionUuid;references:Uuid;"`
 	PersonalQuestionUuid string           `json:"personal_question_uuid"`
 	Answer               string           `json:"answer"`
 	UserUuid             string           `json:"user_uuid"`

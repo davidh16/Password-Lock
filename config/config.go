@@ -19,6 +19,7 @@ type Config struct {
 	SmtpHost            string `env:"SMTP_HOST"`
 	SmtpFrom            string `env:"SMTP_FROM"`
 	FirebaseAppPassword string `env:"FIREBASE_APP_PASSWORD"`
+	BaseUrl             string `env:"BASE_URL"`
 }
 
 func GetConfig() *Config {

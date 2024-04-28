@@ -1,6 +1,8 @@
 package validations
 
 import (
+	"errors"
+	"github.com/samber/lo"
 	"password-lock/models"
 	"reflect"
 )
@@ -31,4 +33,27 @@ func IsCompleteRegistrationRequestValid(personalQuestions []*models.UserPersonal
 	}
 
 	return true
+}
+
+func ValidatePersonalQuestionsAnswers(userPersonalQuestions []models.UserPersonalQuestion, personalQuestionsFromRequest []models.UserPersonalQuestion) error {
+	for _, personalQuestion := range userPersonalQuestions {
+		var answerFromRequest string
+		_, exist := lo.Find(personalQuestionsFromRequest, func(item models.UserPersonalQuestion) bool {
+			if item.PersonalQuestionUuid == personalQuestion.PersonalQuestionUuid {
+				answerFromRequest = item.Answer
+				return true
+			}
+			return false
+		})
+
+		if exist {
+			if personalQuestion.Answer != answerFromRequest {
+				return errors.New("we could not verify your identity")
+			}
+		} else {
+			return errors.New("we could not verify your identity")
+		}
+	}
+
+	return nil
 }

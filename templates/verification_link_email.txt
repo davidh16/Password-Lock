@@ -1,0 +1,29 @@
+<mjml>
+  <mj-head>
+    <mj-title>Account verification</mj-title>
+  </mj-head>
+  <mj-body>
+
+    <mj-section background-color="#fff" padding-top="20px" padding-bottom="20px">
+      <mj-column>
+        <mj-text font-size="28px" color="#4c4c4c" font-weight="bold">We need you to verify your email address</mj-text>
+        <mj-text font-size="18px" color="#4c4c4c" line-height="28px" padding-top="10px">Thanks for choosing Password Lock as your password manager. We promise you your secrets are safe with us. Before continuing our collaboration, we need you to verify your email address.</mj-text>
+        <mj-text font-size="18px" color="#4c4c4c" line-height="28px" padding-top="10px">Please verify your email address by clicking the button below</mj-text>
+        <mj-button background-color="#0099ff" color="#ffffff" font-size="20px" font-weight="bold" href="{{ .BaseUrl }}/verify?token={{ .Token }}" padding="30px 0" border-radius="5px" inner-padding="15px 40px">Verify</mj-button>
+
+<mj-text font-size="18px" color="#4c4c4c" line-height="28px" padding-top="10px">
+In case of button not working, please copy and paste this link to your browser : </br>
+{{ .BaseUrl }}/verify?token={{ .Token }}
+</mj-text>
+
+<mj-text font-size="18px" color="#4c4c4c" line-height="28px" padding-top="10px">
+Best regards,</br>
+  your Password Lock
+ </mj-text>
+
+      </mj-column>
+    </mj-section>
+
+
+  </mj-body>
+</mjml>

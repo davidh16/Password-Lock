@@ -2,7 +2,6 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/redis/go-redis/v9"
 	"password-lock/controller"
 	mw "password-lock/middleware"
 )
@@ -12,14 +11,12 @@ type Server struct {
 	router     *gin.Engine
 }
 
-func NewServer(ctrl *controller.Controller, redis *redis.Client) Server {
-
-	authMw := mw.InitializeAuthMiddleware(redis)
-	_ = mw.InitializeCORSMiddleware(redis)
+func NewServer(ctrl *controller.Controller, middleware *mw.Middleware) Server {
 
 	router := gin.Default()
+	router.Use(middleware.CORS())
 
-	initializeRoutes(router, ctrl, authMw)
+	initializeRoutes(router, ctrl, middleware)
 
 	return Server{
 		controller: ctrl,

@@ -4,6 +4,7 @@ import (
 	"password-lock/config"
 	"password-lock/controller"
 	"password-lock/db"
+	mw "password-lock/middleware"
 	"password-lock/repository"
 	"password-lock/server"
 	"password-lock/service"
@@ -31,7 +32,9 @@ func main() {
 
 	ctrl := controller.NewController(svc)
 
-	srv := server.NewServer(ctrl, redis)
+	middleware := mw.InitializeMiddleware(pgInstance, redis)
+
+	srv := server.NewServer(ctrl, middleware)
 
 	// Listen and Server in 0.0.0.0:8080
 	srv.Run(":8080")

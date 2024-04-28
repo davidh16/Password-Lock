@@ -5,6 +5,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+	"password-lock/db"
 	"password-lock/models"
 )
 
@@ -18,10 +20,20 @@ func (s Service) RegisterUser(ctx *gin.Context, user *models.User) (*models.User
 	return user, nil
 }
 
+func (s Service) UpdatePassword(ctx *gin.Context, user *models.User, newPassword string) error {
+	user.Password = newPassword
+	result := s.userRepository.Db().Set("encrypt-password", true).Table(db.USERS_TABLE).Where("uuid=?", user.Uuid).Omit(clause.Associations).Save(user)
+	if result.Error != nil {
+		return result.Error
+	}
+
+	return nil
+}
+
 func (s Service) VerifyUser(ctx *gin.Context, userUuid string, password string) (*models.User, error) {
 
 	var user models.User
-	result := s.userRepository.Db().Where("uuid=? AND active = FALSE", userUuid).First(&user)
+	result := s.userRepository.Db().Table(db.USERS_TABLE).Where("uuid=? AND active = FALSE", userUuid).First(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -29,7 +41,7 @@ func (s Service) VerifyUser(ctx *gin.Context, userUuid string, password string) 
 	user.Active = true
 	user.Password = password
 
-	result = s.userRepository.Db().Set("encrypt-password", true).Table("users").Where("uuid=? AND active = FALSE", userUuid).Save(&user)
+	result = s.userRepository.Db().Set("encrypt-password", true).Table(db.USERS_TABLE).Where("uuid=? AND active = FALSE", userUuid).Save(&user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -45,7 +57,7 @@ func (s Service) CompleteRegistration(ctx *gin.Context, user *models.User, perso
 		return nil, err
 	}
 
-	result := tx.Table("users").Where("uuid=? AND active = TRUE AND completed = FALSE", user.Uuid).Save(user)
+	result := tx.Table(db.USERS_TABLE).Where("uuid=? AND active = TRUE AND completed = FALSE", user.Uuid).Save(user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -96,12 +108,7 @@ func (s Service) Authorize(userUuid string, password string) error {
 
 func (s Service) Me(ctx *gin.Context) (*models.User, error) {
 
-	//me, err := s.userRepository.FindUserByUuid(ctx.Value("me").(string))
-	//if err != nil {
-	//	return nil, err
-	//}
-
-	me, err := s.userRepository.FindUserByUuid("3174f700-389a-4cf0-8636-8c520145baf5")
+	me, err := s.userRepository.FindUserByUuid(ctx.Value("me").(string))
 	if err != nil {
 		return nil, err
 	}

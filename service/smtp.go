@@ -1,18 +1,25 @@
 package service
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
 	"net/smtp"
+	"password-lock/templates"
 )
 
-func (s Service) SendAccountVerifiedEmail(emailAddress string, secretKey string) error {
+func (s Service) SendPasswordEmail(emailAddress string, password string) error {
 
-	messageText := "\nThis is your secret key : " + secretKey + "\nWe strongly advise you to write it down in a physical form and to delete this email.\nWe also remind you that without this secret key, you will not be able to access rest of your passwords.\nThank you for using Password Locker."
+	subject := "Password Lock password"
 
-	// Message.
-	message := []byte("Subject: Password Locker Secret Key\r\n" + messageText)
+	body, err := ParseTemplate("password_email.html", struct {
+		Password string
+	}{Password: password})
+	if err != nil {
+		return err
+	}
 
-	err := s.sendEmail(emailAddress, message)
+	err = s.sendEmail(emailAddress, subject, body)
 	if err != nil {
 		return err
 	}
@@ -22,25 +29,17 @@ func (s Service) SendAccountVerifiedEmail(emailAddress string, secretKey string)
 }
 
 func (s Service) SendVerificationLinkEmail(emailAddress string, token string) error {
-	messageText := "\nThis is your verification token : " + token
-	// Message.
-	message := []byte("Subject: Password Locker Verification token\r\n" + messageText)
+	subject := "Account verification"
 
-	err := s.sendEmail(emailAddress, message)
+	body, err := ParseTemplate("verification_link_email.html", struct {
+		BaseUrl string
+		Token   string
+	}{Token: token, BaseUrl: s.cfg.BaseUrl})
 	if err != nil {
 		return err
 	}
 
-	fmt.Println("Email Sent Successfully!")
-	return nil
-}
-
-func (s Service) SendNewPasswordEmail(emailAddress string, token string) error {
-	messageText := "\nThis is your new password token : " + token
-	// Message.
-	message := []byte("Subject: Password Locker new password token\r\n" + messageText)
-
-	err := s.sendEmail(emailAddress, message)
+	err = s.sendEmail(emailAddress, subject, body)
 	if err != nil {
 		return err
 	}
@@ -50,22 +49,73 @@ func (s Service) SendNewPasswordEmail(emailAddress string, token string) error {
 }
 
 func (s Service) SendPasswordResetLinkEmail(emailAddress string, token string) error {
+	subject := "Password reset"
+
+	body, err := ParseTemplate("password_reset_link_email.html", struct {
+		BaseUrl string
+		Token   string
+	}{BaseUrl: s.cfg.BaseUrl, Token: token})
+	if err != nil {
+		return err
+	}
+
+	err = s.sendEmail(emailAddress, subject, body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Email Sent Successfully!")
 	return nil
 }
 
-func (s Service) sendEmail(to string, message []byte) error {
+func (s Service) SendNewPasswordEmail(emailAddress string, newPassword string) error {
+	subject := "Password Lock new password"
+
+	body, err := ParseTemplate("new_password_email.html", struct {
+		Password string
+	}{Password: newPassword})
+	if err != nil {
+		return err
+	}
+
+	err = s.sendEmail(emailAddress, subject, body)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println("Email Sent Successfully!")
+	return nil
+}
+
+func (s Service) sendEmail(to string, subject string, body string) error {
 
 	receivers := []string{
 		to,
 	}
 
+	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
+	subject = "Subject: " + subject + "\n"
+	msg := []byte(subject + mime + "\n" + body)
+
 	auth := smtp.PlainAuth("", s.cfg.SmtpFrom, s.cfg.FirebaseAppPassword, s.cfg.SmtpHost)
 
 	// Sending email.
-	err := smtp.SendMail(s.cfg.SmtpHost+":"+s.cfg.SmtpPort, auth, s.cfg.SmtpFrom, receivers, message)
+	err := smtp.SendMail(s.cfg.SmtpHost+":"+s.cfg.SmtpPort, auth, s.cfg.SmtpFrom, receivers, msg)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func ParseTemplate(templateFileName string, data interface{}) (string, error) {
+
+	t1 := template.Must(template.New(templateFileName).ParseFS(templates.Files, templateFileName))
+
+	var tpl bytes.Buffer
+	if err := t1.Execute(&tpl, data); err != nil {
+		return "", err
+	}
+
+	return tpl.String(), nil
 }

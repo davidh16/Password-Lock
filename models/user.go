@@ -14,7 +14,7 @@ type User struct {
 	CreatedAt         time.Time              `json:"created_at"`
 	Active            bool                   `json:"active"`
 	Completed         bool                   `json:"completed"`
-	PersonalQuestions []UserPersonalQuestion `gorm:"foreignKey:UserUuid;references:Uuid"`
+	PersonalQuestions []UserPersonalQuestion `gorm:"foreignKey:UserUuid;references:Uuid;"`
 }
 
 func (u *User) Validate() error {

@@ -129,7 +129,7 @@ func (c Controller) VerifyAccount(ctx *gin.Context) {
 		return
 	}
 
-	err = c.service.SendAccountVerifiedEmail(user.EmailAddress, password)
+	err = c.service.SendPasswordEmail(user.EmailAddress, password)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
@@ -266,10 +266,6 @@ func (c Controller) Logout(ctx *gin.Context) {
 	return
 }
 
-func (c Controller) Me(ctx *gin.Context) {
-
-}
-
 func (c Controller) ForgotPassword(ctx *gin.Context) {
 	var forgotPasswordRequest struct {
 		EmailAddress string `json:"email_address"`
@@ -300,7 +296,7 @@ func (c Controller) ForgotPassword(ctx *gin.Context) {
 		return
 	}
 
-	err = c.service.SendNewPasswordEmail(user.EmailAddress, token.Token)
+	err = c.service.SendPasswordResetLinkEmail(user.EmailAddress, token.Token)
 	if err != nil {
 		log.Println("failed to send an email")
 		return
@@ -312,7 +308,7 @@ func (c Controller) ForgotPassword(ctx *gin.Context) {
 	return
 }
 
-func (c Controller) GetSecurityQuestionsByToken(ctx *gin.Context) {
+func (c Controller) GetUserPersonalQuestionsByToken(ctx *gin.Context) {
 	t := ctx.Query("token")
 
 	token, err := c.service.GetToken(t)
@@ -321,20 +317,181 @@ func (c Controller) GetSecurityQuestionsByToken(ctx *gin.Context) {
 			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
 		})
+		return
 	}
 
 	if token == nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusForbidden,
 		})
+		return
 	}
 
 	if token.IsUsed != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusForbidden,
 		})
+		return
+	}
+
+	if token.TokenType != models.TOKEN_TYPE_FORGOT_PASSWORD {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusForbidden,
+		})
+		return
 	}
 
 	ctx.JSON(http.StatusOK, token.User.PersonalQuestions)
+	return
+}
+
+func (c Controller) CheckPersonalQuestionsAnswers(ctx *gin.Context) {
+	t := ctx.Query("token")
+
+	token, err := c.service.GetToken(t)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	if token == nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusForbidden,
+		})
+		return
+	}
+
+	if token.IsUsed != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusForbidden,
+		})
+		return
+	}
+
+	if token.TokenType != models.TOKEN_TYPE_FORGOT_PASSWORD {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusForbidden,
+		})
+		return
+	}
+
+	var personalQuestionsFromRequest []models.UserPersonalQuestion
+	err = json.NewDecoder(ctx.Request.Body).Decode(&personalQuestionsFromRequest)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	err = validations.ValidatePersonalQuestionsAnswers(token.User.PersonalQuestions, personalQuestionsFromRequest)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusForbidden,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	_, err = c.service.UpdateToken(ctx, token)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	passswordResetToken, err := c.service.CreateToken(ctx, token.UserUuid, models.TOKEN_TYPE_PASSWORD_RESET)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	ctx.JSON(200, struct {
+		PasswordResetToken string `json:"password_reset_token"`
+	}{PasswordResetToken: passswordResetToken.Token})
+	return
+}
+
+func (c Controller) ResetPassword(ctx *gin.Context) {
+	t := ctx.Query("token")
+
+	token, err := c.service.GetToken(t)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	if token == nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusForbidden,
+		})
+		return
+	}
+
+	if token.IsUsed != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusForbidden,
+		})
+		return
+	}
+
+	if token.TokenType != models.TOKEN_TYPE_PASSWORD_RESET {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusForbidden,
+		})
+		return
+	}
+
+	_, err = c.service.UpdateToken(ctx, token)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	newPassword, err := utils.GenerateRandomStringURLSafe()
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	err = c.service.UpdatePassword(ctx, &token.User, newPassword)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	err = c.service.SendNewPasswordEmail(token.User.EmailAddress, newPassword)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	c.SendResponse(ctx, Response{
+		Status: http.StatusOK,
+	})
 	return
 }

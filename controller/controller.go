@@ -44,4 +44,7 @@ func (c Controller) SendResponse(ctx *gin.Context, response Response) {
 	} else if len(response.Error) > 0 {
 		ctx.JSON(response.Status, map[string]interface{}{"error": response.Error})
 	}
+
+	ctx.JSON(response.Status, struct {
+	}{})
 }

@@ -4,31 +4,25 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
+	"gorm.io/gorm"
 	"net/http"
+	"password-lock/db"
+	"password-lock/models"
 )
 
-//type Middleware struct {
-//	CORSMiddleware CORSMiddleware
-//	AuthMiddleware AuthMiddleware
-//}
-
-type CORSMiddleware struct{}
-
-type AuthMiddleware struct {
+type Middleware struct {
+	db    *gorm.DB
 	redis *redis.Client
 }
 
-func InitializeAuthMiddleware(redis *redis.Client) *AuthMiddleware {
-	return &AuthMiddleware{
+func InitializeMiddleware(db *gorm.DB, redis *redis.Client) *Middleware {
+	return &Middleware{
+		db:    db,
 		redis: redis,
 	}
 }
 
-func InitializeCORSMiddleware(redis *redis.Client) *CORSMiddleware {
-	return &CORSMiddleware{}
-}
-
-func (m *AuthMiddleware) AuthMiddleware() gin.HandlerFunc {
+func (m *Middleware) Auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		sessionUuid, err := ctx.Cookie("session")
 		if err != nil {
@@ -53,7 +47,29 @@ func (m *AuthMiddleware) AuthMiddleware() gin.HandlerFunc {
 	}
 }
 
-func (m *CORSMiddleware) CORSMiddleware() gin.HandlerFunc {
+func (m *Middleware) User() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var user models.User
+		me, ok := ctx.Get("me")
+		if ok {
+			result := m.db.Table(db.USERS_TABLE).Where("uuid=?", me).First(&user)
+			if result.Error != nil {
+				ctx.AbortWithStatus(http.StatusNotFound)
+				return
+			}
+		} else {
+			ctx.AbortWithStatus(http.StatusProxyAuthRequired)
+			return
+		}
+
+		if !user.Completed {
+			ctx.AbortWithStatus(http.StatusNotAcceptable)
+			return
+		}
+	}
+}
+
+func (m *Middleware) CORS() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")

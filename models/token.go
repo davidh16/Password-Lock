@@ -17,6 +17,7 @@ type Token struct {
 
 const (
 	TOKEN_TYPE_FORGOT_PASSWORD = "forgot_password"
+	TOKEN_TYPE_PASSWORD_RESET  = "password_reset"
 	TOKEN_TYPE_VERIFICATION    = "verification"
 	TOKEN_TYPE_NEW_EMAIL       = "new_email"
 	TOKEN_TYPE_DELETE_ACCOUNT  = "delete_accoun"
@@ -32,6 +33,6 @@ func (t *Token) Validate() error {
 
 var TokenValidateRules = map[string]string{
 	"Token":     "required",
-	"TokenType": "required,oneof=forgot_password verification new_email delete_account",
+	"TokenType": "required,oneof=forgot_password verification new_email delete_account password_reset",
 	"ExpireAt":  "required",
 }

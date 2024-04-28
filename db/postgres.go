@@ -18,3 +18,11 @@ func ConnectToDatabase() *gorm.DB {
 	fmt.Println(" Successfully connected to database")
 	return db
 }
+
+const (
+	USERS_TABLE                   = "users"
+	ENTITIES_TABLE                = "entities"
+	TOKENS_TABLE                  = "tokens"
+	PERSONAL_QUESTIONS_TABLE      = "personal_questions"
+	USER_PERSONAL_QUESTIONS_TABLE = "user_personal_questions"
+)

@@ -2,7 +2,6 @@ package service
 
 import (
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"password-lock/models"
 	"password-lock/utils"
 	"time"
@@ -41,16 +40,10 @@ func (s Service) UpdateToken(ctx *gin.Context, token *models.Token) (*models.Tok
 		return nil, err
 	}
 
-	tx := s.entityRepository.Db().Begin()
-	err = setTransaction(ctx, []*gorm.DB{tx})
-	if err != nil {
-		return nil, err
-	}
-
 	now := time.Now()
 	token.IsUsed = &now
 
-	result := tx.Where("uuid=?", token.Uuid).Save(&token)
+	result := s.tokenRepository.Db().Where("uuid=?", token.Uuid).Omit("User").Save(token)
 	if result.Error != nil {
 		return nil, result.Error
 	}
