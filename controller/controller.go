@@ -40,11 +40,12 @@ func (c Controller) SendResponse(ctx *gin.Context, response Response) {
 	}
 
 	if len(response.Message) > 0 {
-		ctx.JSON(response.Status, map[string]interface{}{"message": response.Message})
+		ctx.JSON(response.Status, map[string]string{"message": response.Message})
+		return
 	} else if len(response.Error) > 0 {
-		ctx.JSON(response.Status, map[string]interface{}{"error": response.Error})
+		ctx.JSON(response.Status, map[string]string{"error": response.Error})
+		return
 	}
 
-	ctx.JSON(response.Status, struct {
-	}{})
+	ctx.Writer.WriteHeader(response.Status)
 }

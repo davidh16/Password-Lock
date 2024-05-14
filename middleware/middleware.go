@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -26,6 +27,7 @@ func (m *Middleware) Auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		sessionUuid, err := ctx.Cookie("session")
 		if err != nil {
+			fmt.Println(err)
 			ctx.AbortWithStatus(http.StatusProxyAuthRequired)
 			return
 		}
@@ -71,7 +73,7 @@ func (m *Middleware) User() gin.HandlerFunc {
 
 func (m *Middleware) CORS() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")

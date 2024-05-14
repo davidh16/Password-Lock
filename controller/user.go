@@ -70,6 +70,10 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 
 	err = c.service.SendVerificationLinkEmail(user.EmailAddress, verificationToken.Token)
 	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusBadRequest,
+			Error:  errors.New("email address is not valid").Error(),
+		})
 		log.Println("failed to send an email")
 		return
 	}
@@ -287,7 +291,7 @@ func (c Controller) Login(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("session", sessionKey, 600, "/", "", true, true)
+	ctx.SetCookie("session", sessionKey, 600, "/", "", true, false)
 
 	c.SendResponse(ctx, Response{
 		Status:  http.StatusOK,
@@ -546,4 +550,16 @@ func (c Controller) ResetPassword(ctx *gin.Context) {
 		Status: http.StatusOK,
 	})
 	return
+}
+
+func (c Controller) Me(ctx *gin.Context) {
+	me, err := c.service.Me(ctx)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+	ctx.JSON(http.StatusOK, me)
 }

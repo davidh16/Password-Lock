@@ -2,6 +2,7 @@ package repository
 
 import (
 	"gorm.io/gorm"
+	"password-lock/db"
 	"password-lock/models"
 )
 
@@ -10,6 +11,7 @@ type UserRepository interface {
 	FindUserByEmailAddress(emailAddress string) (*models.User, error)
 	FindUnverifiedUserByEmailAddress(emailAddress string) (*models.User, error)
 	FindUserByUuid(userUuid string) (*models.User, error)
+	FindAllSecurityQuestions() ([]models.PersonalQuestion, error)
 }
 
 type userRepository struct {
@@ -50,4 +52,13 @@ func (r userRepository) FindUserByUuid(userUuid string) (*models.User, error) {
 		return nil, result.Error
 	}
 	return &foundUser, nil
+}
+
+func (r userRepository) FindAllSecurityQuestions() ([]models.PersonalQuestion, error) {
+	var securityQuestions []models.PersonalQuestion
+	result := r.Db().Table(db.PERSONAL_QUESTIONS_TABLE).Find(&securityQuestions)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return securityQuestions, nil
 }

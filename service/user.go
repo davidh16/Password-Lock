@@ -107,7 +107,6 @@ func (s Service) Authorize(userUuid string, password string) error {
 }
 
 func (s Service) Me(ctx *gin.Context) (*models.User, error) {
-
 	me, err := s.userRepository.FindUserByUuid(ctx.Value("me").(string))
 	if err != nil {
 		return nil, err

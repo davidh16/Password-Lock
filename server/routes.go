@@ -12,11 +12,13 @@ func initializeRoutes(r *gin.Engine, ctrl *controller.Controller, m *middleware.
 	r.POST("/verify", ctrl.VerifyAccount)
 	r.POST("/login", ctrl.Login)
 	r.POST("/forgot-password", ctrl.ForgotPassword)
-	r.GET("/personal-questions", ctrl.GetUserPersonalQuestionsByToken)
+	r.POST("/personal-questions", ctrl.GetUserPersonalQuestionsByToken)
 	r.POST("/check-personal-questions", ctrl.CheckPersonalQuestionsAnswers)
 	r.POST("/reset-password", ctrl.ResetPassword)
 	r.POST("/resend-verification-email", ctrl.ResendVerificationEmail)
+	r.GET("/list-security-questions", ctrl.ResendVerificationEmail)
 
+	r.POST("/me", m.Auth(), ctrl.Me)
 	r.POST("/complete-registration", m.Auth(), ctrl.CompleteRegistration)
 	r.POST("/logout", m.Auth(), m.User(), ctrl.Logout)
 
