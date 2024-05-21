@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
@@ -15,5 +17,15 @@ func (c Controller) ListSecurityQuestions(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, securityQuestions)
+	data := map[string]interface{}{
+		"security_questions": securityQuestions,
+	}
+
+	response, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+		return
+	}
+
+	ctx.JSON(http.StatusOK, string(response))
 }

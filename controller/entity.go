@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"password-lock/models"
@@ -213,7 +214,17 @@ func (c Controller) ListEntities(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(200, entities)
+	data := map[string]interface{}{
+		"entities": entities,
+	}
+
+	response, err := json.Marshal(data)
+	if err != nil {
+		fmt.Println("Error marshaling JSON:", err)
+		return
+	}
+
+	ctx.JSON(200, string(response))
 }
 
 func (c Controller) DownloadEntityIcon(ctx *gin.Context) {
