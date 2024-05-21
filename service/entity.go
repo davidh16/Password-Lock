@@ -40,13 +40,7 @@ func (s Service) GetEntityIconPath(entityType int) string {
 }
 
 func (s Service) CreateEntity(ctx *gin.Context, entity models.Entity) (*models.Entity, error) {
-	tx := s.entityRepository.Db().Begin()
-	err := setTransaction(ctx, []*gorm.DB{tx})
-	if err != nil {
-		return nil, err
-	}
-
-	result := tx.Create(&entity)
+	result := s.entityRepository.Db().Create(&entity)
 	if result.Error != nil {
 		return nil, result.Error
 	}

@@ -10,7 +10,7 @@ type Entity struct {
 	Description  *string `json:"description,omitempty"`
 	Type         int     `json:"type,omitempty"`
 	UserUuid     string  `json:"user_uuid,omitempty"`
-	User         User    `gorm:"constraint:OnDelete:CASCADE references:UserUuid"`
+	User         User    `gorm:"constraint:OnDelete:CASCADE;foreignKey:Uuid;references:UserUuid"`
 	SecretKey    string  `json:"secret_key,omitempty" gorm:"-"`
 }
 
