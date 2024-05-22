@@ -105,12 +105,12 @@ func (s Service) ListEntities(ctx *gin.Context) ([]models.Entity, error) {
 		return nil, result.Error
 	}
 
-	for _, entity := range entities {
-		decryptedPassword, err := s.decryptPassword(entity.Password)
+	for i, _ := range entities {
+		decryptedPassword, err := s.decryptPassword(entities[i].Password)
 		if err != nil {
 			return nil, err
 		}
-		entity.Password = decryptedPassword
+		entities[i].Password = decryptedPassword
 	}
 
 	return entities, nil

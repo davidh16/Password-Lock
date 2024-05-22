@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"password-lock/models"
+	"password-lock/validations"
 	"strings"
 )
 
@@ -23,10 +24,11 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 		return
 	}
 
-	if entity.Password == "" {
+	err = validations.ValidateCreateEntityRequest(entity)
+	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusBadRequest,
-			Error:  "password not provided for given entity",
+			Error:  err.Error(),
 		})
 		return
 	}
