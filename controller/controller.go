@@ -55,12 +55,12 @@ func (c Controller) SendResponse(ctx *gin.Context, response Response) {
 
 func (c Controller) encryptResponse(text string) (string, error) {
 
-	iv, err := hex.DecodeString(c.service.Cfg.EntitySecretVector)
+	iv, err := hex.DecodeString(c.service.Cfg.ResponseSecretVector)
 	if err != nil {
 		return "", err
 	}
 
-	block, err := aes.NewCipher([]byte(c.service.Cfg.EntitySecretKey))
+	block, err := aes.NewCipher([]byte(c.service.Cfg.ResponseSecretKey))
 	if err != nil {
 		return "", err
 	}
