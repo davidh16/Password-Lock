@@ -3,32 +3,13 @@ package service
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"encoding/base64"
-	"fmt"
+	"encoding/base32"
+	"encoding/hex"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"password-lock/models"
 	"strings"
 )
-
-func (s Service) EncryptPassword(secretKey string, password string) string {
-
-	c, err := aes.NewCipher([]byte(secretKey))
-	if err != nil {
-		panic(err)
-	}
-
-	gcm, err := cipher.NewGCM(c)
-	if err != nil {
-		panic(err)
-	}
-
-	nonce := make([]byte, gcm.NonceSize())
-
-	encryptedPassowrd := gcm.Seal(nonce, nonce, []byte(password), nil)
-
-	return base64.StdEncoding.EncodeToString(encryptedPassowrd)
-}
 
 func (s Service) GetEntityIconPath(entityType int) string {
 
@@ -40,6 +21,14 @@ func (s Service) GetEntityIconPath(entityType int) string {
 }
 
 func (s Service) CreateEntity(ctx *gin.Context, entity models.Entity) (*models.Entity, error) {
+
+	encryptedPassword, err := s.encryptPassword(entity.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	entity.Password = encryptedPassword
+
 	result := s.entityRepository.Db().Create(&entity)
 	if result.Error != nil {
 		return nil, result.Error
@@ -48,21 +37,25 @@ func (s Service) CreateEntity(ctx *gin.Context, entity models.Entity) (*models.E
 }
 
 func (s Service) UpdateEntity(ctx *gin.Context, updatedEntity *models.Entity) error {
-	tx := s.entityRepository.Db().Begin()
-	err := setTransaction(ctx, []*gorm.DB{tx})
-	if err != nil {
-		return err
-	}
 
 	var entity models.Entity
-	result := tx.Where("uuid=?", updatedEntity.Uuid).First(&entity)
+	result := s.entityRepository.Db().Where("uuid=?", updatedEntity.Uuid).First(&entity)
 	if result.Error != nil {
 		return result.Error
 	}
 
+	if ctx.Value("encryption").(bool) {
+		encryptedPassword, err := s.encryptPassword(updatedEntity.Password)
+		if err != nil {
+			return err
+		}
+
+		updatedEntity.Password = encryptedPassword
+	}
+
 	entity.Merge(updatedEntity)
 
-	result = tx.Where("uuid=?", updatedEntity.Uuid).Save(&entity)
+	result = s.entityRepository.Db().Where("uuid=?", updatedEntity.Uuid).Save(&entity)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -84,7 +77,7 @@ func (s Service) DeleteEntity(ctx *gin.Context, entityUuid string) error {
 	return nil
 }
 
-func (s Service) GetEntityByUuid(ctx *gin.Context, entityUuid string, secretKey string) (*models.Entity, error) {
+func (s Service) GetEntityByUuid(ctx *gin.Context, entityUuid string) (*models.Entity, error) {
 
 	me := ctx.Value("me").(string)
 
@@ -94,7 +87,7 @@ func (s Service) GetEntityByUuid(ctx *gin.Context, entityUuid string, secretKey 
 		return nil, result.Error
 	}
 
-	decryptedPassword, err := decryptEntityPassword(entity.Password, secretKey)
+	decryptedPassword, err := s.decryptPassword(entity.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -112,48 +105,63 @@ func (s Service) ListEntities(ctx *gin.Context) ([]models.Entity, error) {
 		return nil, result.Error
 	}
 
-	return hideEntityPasswords(entities), nil
-}
-
-func hideEntityPasswords(entities []models.Entity) []models.Entity {
-	var entitiyListWithHiddenPasswords []models.Entity
 	for _, entity := range entities {
-		entitiyListWithHiddenPasswords = append(entitiyListWithHiddenPasswords, *entity.HidePassword())
+		decryptedPassword, err := s.decryptPassword(entity.Password)
+		if err != nil {
+			return nil, err
+		}
+		entity.Password = decryptedPassword
 	}
-	return entitiyListWithHiddenPasswords
+
+	return entities, nil
 }
 
-func decryptEntityPassword(password string, secretKey string) (string, error) {
+func (s Service) encryptPassword(password string) (string, error) {
 
-	ciphertext, err := base64.StdEncoding.DecodeString(password)
+	iv, err := hex.DecodeString(s.cfg.EntitySecretVector)
 	if err != nil {
 		return "", err
 	}
 
-	key := []byte(secretKey)
+	block, err := aes.NewCipher([]byte(s.cfg.EntitySecretKey))
+	if err != nil {
+		return "", err
+	}
+	plainText := []byte(password)
+	cfb := cipher.NewCFBEncrypter(block, iv)
+	cipherText := make([]byte, len(plainText))
+	cfb.XORKeyStream(cipherText, plainText)
+	return Encode(cipherText), nil
+}
 
-	c, err := aes.NewCipher(key)
+func (s Service) decryptPassword(password string) (string, error) {
+
+	iv, err := hex.DecodeString(s.cfg.EntitySecretVector)
 	if err != nil {
 		return "", err
 	}
 
-	gcm, err := cipher.NewGCM(c)
+	//Create a new Cipher Block from the key
+	block, err := aes.NewCipher([]byte(s.cfg.EntitySecretKey))
 	if err != nil {
 		return "", err
 	}
+	cipherText := Decode(password)
+	cfb := cipher.NewCFBDecrypter(block, iv)
+	plainText := make([]byte, len(cipherText))
+	cfb.XORKeyStream(plainText, cipherText)
 
-	nonceSize := gcm.NonceSize()
-	if len(ciphertext) < nonceSize {
-		return "", fmt.Errorf("ciphertext too short")
-	}
+	return string(plainText), nil
+}
 
-	nonce, ciphertext := ciphertext[:nonceSize], ciphertext[nonceSize:]
+func Encode(b []byte) string {
+	return base32.StdEncoding.EncodeToString(b)
+}
 
-	decryptedPassword, err := gcm.Open(nil, nonce, ciphertext, nil)
+func Decode(s string) []byte {
+	data, err := base32.StdEncoding.DecodeString(s)
 	if err != nil {
-		return "", err
+		panic(err)
 	}
-
-	return string(decryptedPassword), nil
-
+	return data
 }

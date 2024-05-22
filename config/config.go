@@ -13,7 +13,9 @@ import (
 type Config struct {
 	PgUrl               string `env:"PG_URL"`
 	Port                string `env:"PORT"`
-	SecretKey           string `env:"SECRET_KEY"`
+	UserSecretKey       string `env:"USER_SECRET_KEY"`
+	EntitySecretKey     string `env:"ENTITY_SECRET_KEY"`
+	EntitySecretVector  string `env:"ENTITY_SECRET_VECTOR"`
 	StorageBucket       string `env:"STORAGE_BUCKET"`
 	SmtpPort            string `env:"SMTP_PORT"`
 	SmtpHost            string `env:"SMTP_HOST"`

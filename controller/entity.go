@@ -31,18 +31,9 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 		return
 	}
 
-	if entity.SecretKey == "" {
-		c.SendResponse(ctx, Response{
-			Status: http.StatusBadRequest,
-			Error:  "secret key not provided",
-		})
-		return
-	}
-
 	if entity.Type < 6 && entity.Type > 0 {
 		entity.IconPath = c.service.GetEntityIconPath(entity.Type)
 	}
-	entity.Password = c.service.EncryptPassword(entity.SecretKey, entity.Password)
 
 	me := ctx.Value("me").(string)
 
@@ -99,14 +90,7 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 	}
 
 	if updatedEntity.Password != "" {
-		if updatedEntity.SecretKey == "" {
-			c.SendResponse(ctx, Response{
-				Status: http.StatusBadRequest,
-				Error:  "password can not be updated without providing secret key",
-			})
-			return
-		}
-		updatedEntity.Password = c.service.EncryptPassword(updatedEntity.SecretKey, updatedEntity.Password)
+		ctx.Set("encryption", true)
 	}
 
 	if updatedEntity.Type != 0 {
@@ -177,21 +161,8 @@ func (c Controller) DeleteEntity(ctx *gin.Context) {
 }
 
 func (c Controller) GetEntity(ctx *gin.Context) {
-	var request struct {
-		SecretKey string `json:"secret_key"`
-	}
 
-	// decoding json message to user model
-	err := json.NewDecoder(ctx.Request.Body).Decode(&request)
-	if err != nil {
-		c.SendResponse(ctx, Response{
-			Status: http.StatusInternalServerError,
-			Error:  err.Error(),
-		})
-		return
-	}
-
-	entity, err := c.service.GetEntityByUuid(ctx, ctx.Param("entity_uuid"), request.SecretKey)
+	entity, err := c.service.GetEntityByUuid(ctx, ctx.Query("entity_uuid"))
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,

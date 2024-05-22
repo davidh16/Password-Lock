@@ -11,7 +11,6 @@ type Entity struct {
 	Type         int     `json:"type,omitempty"`
 	UserUuid     string  `json:"user_uuid,omitempty"`
 	User         User    `gorm:"constraint:OnDelete:CASCADE;foreignKey:Uuid;references:UserUuid"`
-	SecretKey    string  `json:"secret_key,omitempty" gorm:"-"`
 }
 
 var TypeMap = map[int]string{

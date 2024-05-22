@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -27,7 +26,6 @@ func (m *Middleware) Auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		sessionUuid, err := ctx.Cookie("session")
 		if err != nil {
-			fmt.Println(err)
 			ctx.AbortWithStatus(http.StatusProxyAuthRequired)
 			return
 		}
