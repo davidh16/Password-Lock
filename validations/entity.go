@@ -21,12 +21,12 @@ func ValidateCreateEntityRequest(entity models.Entity) error {
 		}
 	}
 
-	if entity.Name == "" {
-		return errors.New("validation error : invalid name")
-	}
-
 	if entity.Type > 6 && entity.Type < 1 {
 		return errors.New("validation error : invalid type")
+	}
+
+	if entity.Type == 6 && entity.Name == "" {
+		return errors.New("validation error : invalid name")
 	}
 
 	if entity.Description != nil {

@@ -41,6 +41,10 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 
 	entity.UserUuid = me
 
+	if entity.Type != 6 && entity.Name == "" {
+		entity.Name = models.TypeMap[entity.Type]
+	}
+
 	createdEntity, err := c.service.CreateEntity(ctx, entity)
 	if err != nil {
 		c.SendResponse(ctx, Response{
