@@ -26,7 +26,7 @@ func (s Service) UploadIconToBucket(ctx *gin.Context, entityUuid string) (string
 	}
 	defer uploadedFile.Close()
 
-	cfg := config.GetConfig()
+	Cfg := config.GetConfig()
 
 	opt := option.WithCredentialsFile("password-lock-486ee-firebase-adminsdk-xtd5c-cc43257771.json")
 	app, err := firebase.NewApp(ctx, nil, opt)
@@ -41,7 +41,7 @@ func (s Service) UploadIconToBucket(ctx *gin.Context, entityUuid string) (string
 	}
 
 	// Create a storage reference
-	storageRef, err := client.Bucket(cfg.StorageBucket)
+	storageRef, err := client.Bucket(Cfg.StorageBucket)
 	if err != nil {
 		return "", err
 	}
@@ -71,7 +71,7 @@ func (s Service) UploadIconToBucket(ctx *gin.Context, entityUuid string) (string
 
 func (s Service) DownloadEntityIcon(ctx *gin.Context, entityUuid string) ([]byte, error) {
 
-	cfg := config.GetConfig()
+	Cfg := config.GetConfig()
 
 	opt := option.WithCredentialsFile("password-lock-486ee-firebase-adminsdk-xtd5c-cc43257771.json")
 	app, err := firebase.NewApp(ctx, nil, opt)
@@ -86,7 +86,7 @@ func (s Service) DownloadEntityIcon(ctx *gin.Context, entityUuid string) ([]byte
 	}
 
 	// Create a storage reference
-	storageRef, err := client.Bucket(cfg.StorageBucket)
+	storageRef, err := client.Bucket(Cfg.StorageBucket)
 	if err != nil {
 		return nil, err
 	}

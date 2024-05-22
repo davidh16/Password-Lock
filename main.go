@@ -12,7 +12,7 @@ import (
 
 func main() {
 
-	cfg := config.GetConfig()
+	Cfg := config.GetConfig()
 
 	redis := db.ConnectToRedis()
 
@@ -24,7 +24,7 @@ func main() {
 
 	svc := service.NewService(
 		redis,
-		cfg,
+		Cfg,
 		userRepo,
 		entityRepo,
 		tokenRepo,

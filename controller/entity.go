@@ -181,12 +181,14 @@ func (c Controller) GetEntity(ctx *gin.Context) {
 	}
 
 	response, err := json.Marshal(data)
-	c.SendResponse(ctx, Response{
-		Status: http.StatusInternalServerError,
-		Error:  err.Error(),
-	})
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+	}
 
-	encryptedResponse, err := c.service.Encrypt(string(response))
+	encryptedResponse, err := c.encryptResponse(string(response))
 
 	ctx.JSON(200, encryptedResponse)
 
@@ -207,12 +209,14 @@ func (c Controller) ListEntities(ctx *gin.Context) {
 	}
 
 	response, err := json.Marshal(data)
-	c.SendResponse(ctx, Response{
-		Status: http.StatusInternalServerError,
-		Error:  err.Error(),
-	})
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+	}
 
-	encryptedResponse, err := c.service.Encrypt(string(response))
+	encryptedResponse, err := c.encryptResponse(string(response))
 
 	ctx.JSON(200, encryptedResponse)
 }

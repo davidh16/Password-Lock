@@ -9,8 +9,8 @@ import (
 )
 
 func ConnectToDatabase() *gorm.DB {
-	cfg := config.GetConfig()
-	db, err := gorm.Open(postgres.Open(cfg.PgUrl), nil)
+	Cfg := config.GetConfig()
+	db, err := gorm.Open(postgres.Open(Cfg.PgUrl), nil)
 	if err != nil {
 		log.Panic("Could not connect to database: ", err.Error())
 	}

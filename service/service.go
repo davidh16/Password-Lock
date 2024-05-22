@@ -11,7 +11,7 @@ import (
 
 type Service struct {
 	redis            *redis.Client
-	cfg              *config.Config
+	Cfg              *config.Config
 	userRepository   repository.UserRepository
 	entityRepository repository.EntityRepository
 	tokenRepository  repository.TokenRepository
@@ -25,7 +25,7 @@ func NewService(redis *redis.Client,
 ) Service {
 	return Service{
 		redis:            redis,
-		cfg:              config,
+		Cfg:              config,
 		userRepository:   userRepo,
 		entityRepository: entityRepo,
 		tokenRepository:  tokenRepo,

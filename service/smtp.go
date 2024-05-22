@@ -34,7 +34,7 @@ func (s Service) SendVerificationLinkEmail(emailAddress string, token string) er
 	body, err := ParseTemplate("verification_link_email.html", struct {
 		BaseUrl string
 		Token   string
-	}{Token: token, BaseUrl: s.cfg.BaseUrl})
+	}{Token: token, BaseUrl: s.Cfg.BaseUrl})
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func (s Service) SendPasswordResetLinkEmail(emailAddress string, token string) e
 	body, err := ParseTemplate("password_reset_link_email.html", struct {
 		BaseUrl string
 		Token   string
-	}{BaseUrl: s.cfg.BaseUrl, Token: token})
+	}{BaseUrl: s.Cfg.BaseUrl, Token: token})
 	if err != nil {
 		return err
 	}
@@ -97,10 +97,10 @@ func (s Service) sendEmail(to string, subject string, body string) error {
 	subject = "Subject: " + subject + "\n"
 	msg := []byte(subject + mime + "\n" + body)
 
-	auth := smtp.PlainAuth("", s.cfg.SmtpFrom, s.cfg.FirebaseAppPassword, s.cfg.SmtpHost)
+	auth := smtp.PlainAuth("", s.Cfg.SmtpFrom, s.Cfg.FirebaseAppPassword, s.Cfg.SmtpHost)
 
 	// Sending email.
-	err := smtp.SendMail(s.cfg.SmtpHost+":"+s.cfg.SmtpPort, auth, s.cfg.SmtpFrom, receivers, msg)
+	err := smtp.SendMail(s.Cfg.SmtpHost+":"+s.Cfg.SmtpPort, auth, s.Cfg.SmtpFrom, receivers, msg)
 	if err != nil {
 		return err
 	}

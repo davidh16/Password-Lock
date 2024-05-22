@@ -22,7 +22,7 @@ func (s Service) GetEntityIconPath(entityType int) string {
 
 func (s Service) CreateEntity(ctx *gin.Context, entity models.Entity) (*models.Entity, error) {
 
-	encryptedPassword, err := s.Encrypt(entity.Password)
+	encryptedPassword, err := s.encryptEntity(entity.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (s Service) UpdateEntity(ctx *gin.Context, updatedEntity *models.Entity) er
 	}
 
 	if ctx.Value("encryption").(bool) {
-		encryptedPassword, err := s.Encrypt(updatedEntity.Password)
+		encryptedPassword, err := s.encryptEntity(updatedEntity.Password)
 		if err != nil {
 			return err
 		}
@@ -87,7 +87,7 @@ func (s Service) GetEntityByUuid(ctx *gin.Context, entityUuid string) (*models.E
 		return nil, result.Error
 	}
 
-	decryptedPassword, err := s.decrypt(entity.Password)
+	decryptedPassword, err := s.decryptEntity(entity.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (s Service) ListEntities(ctx *gin.Context) ([]models.Entity, error) {
 	}
 
 	for i, _ := range entities {
-		decryptedPassword, err := s.decrypt(entities[i].Password)
+		decryptedPassword, err := s.decryptEntity(entities[i].Password)
 		if err != nil {
 			return nil, err
 		}
@@ -116,14 +116,14 @@ func (s Service) ListEntities(ctx *gin.Context) ([]models.Entity, error) {
 	return entities, nil
 }
 
-func (s Service) Encrypt(text string) (string, error) {
+func (s Service) encryptEntity(text string) (string, error) {
 
-	iv, err := hex.DecodeString(s.cfg.EntitySecretVector)
+	iv, err := hex.DecodeString(s.Cfg.EntitySecretVector)
 	if err != nil {
 		return "", err
 	}
 
-	block, err := aes.NewCipher([]byte(s.cfg.EntitySecretKey))
+	block, err := aes.NewCipher([]byte(s.Cfg.EntitySecretKey))
 	if err != nil {
 		return "", err
 	}
@@ -134,15 +134,15 @@ func (s Service) Encrypt(text string) (string, error) {
 	return Encode(cipherText), nil
 }
 
-func (s Service) decrypt(text string) (string, error) {
+func (s Service) decryptEntity(text string) (string, error) {
 
-	iv, err := hex.DecodeString(s.cfg.EntitySecretVector)
+	iv, err := hex.DecodeString(s.Cfg.EntitySecretVector)
 	if err != nil {
 		return "", err
 	}
 
 	//Create a new Cipher Block from the key
-	block, err := aes.NewCipher([]byte(s.cfg.EntitySecretKey))
+	block, err := aes.NewCipher([]byte(s.Cfg.EntitySecretKey))
 	if err != nil {
 		return "", err
 	}

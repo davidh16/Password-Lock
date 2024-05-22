@@ -1,6 +1,9 @@
 package controller
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"encoding/hex"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"password-lock/service"
@@ -48,4 +51,22 @@ func (c Controller) SendResponse(ctx *gin.Context, response Response) {
 	}
 
 	ctx.Writer.WriteHeader(response.Status)
+}
+
+func (c Controller) encryptResponse(text string) (string, error) {
+
+	iv, err := hex.DecodeString(c.service.Cfg.EntitySecretVector)
+	if err != nil {
+		return "", err
+	}
+
+	block, err := aes.NewCipher([]byte(c.service.Cfg.EntitySecretKey))
+	if err != nil {
+		return "", err
+	}
+	plainText := []byte(text)
+	cfb := cipher.NewCFBEncrypter(block, iv)
+	cipherText := make([]byte, len(plainText))
+	cfb.XORKeyStream(cipherText, plainText)
+	return service.Encode(cipherText), nil
 }
