@@ -38,11 +38,15 @@ func (e *Entity) Merge(data *Entity) {
 	}
 
 	if data.EmailAddress != nil {
-		e.EmailAddress = data.EmailAddress
+		if *data.EmailAddress != "" {
+			e.EmailAddress = data.EmailAddress
+		}
 	}
 
 	if data.Username != nil {
-		e.Username = data.Username
+		if *data.Username != "" {
+			e.Username = data.Username
+		}
 	}
 
 	if data.IconPath != "" {
@@ -50,10 +54,12 @@ func (e *Entity) Merge(data *Entity) {
 	}
 
 	if data.Description != nil {
-		e.Description = data.Description
+		if *data.Description != "" {
+			e.Description = data.Description
+		}
 	}
 
-	if data.Type != 0 {
+	if data.Type > 0 && data.Type < 7 {
 		e.Type = data.Type
 	}
 
