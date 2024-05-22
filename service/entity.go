@@ -22,7 +22,7 @@ func (s Service) GetEntityIconPath(entityType int) string {
 
 func (s Service) CreateEntity(ctx *gin.Context, entity models.Entity) (*models.Entity, error) {
 
-	encryptedPassword, err := s.encryptPassword(entity.Password)
+	encryptedPassword, err := s.Encrypt(entity.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +45,7 @@ func (s Service) UpdateEntity(ctx *gin.Context, updatedEntity *models.Entity) er
 	}
 
 	if ctx.Value("encryption").(bool) {
-		encryptedPassword, err := s.encryptPassword(updatedEntity.Password)
+		encryptedPassword, err := s.Encrypt(updatedEntity.Password)
 		if err != nil {
 			return err
 		}
@@ -87,7 +87,7 @@ func (s Service) GetEntityByUuid(ctx *gin.Context, entityUuid string) (*models.E
 		return nil, result.Error
 	}
 
-	decryptedPassword, err := s.decryptPassword(entity.Password)
+	decryptedPassword, err := s.decrypt(entity.Password)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (s Service) ListEntities(ctx *gin.Context) ([]models.Entity, error) {
 	}
 
 	for i, _ := range entities {
-		decryptedPassword, err := s.decryptPassword(entities[i].Password)
+		decryptedPassword, err := s.decrypt(entities[i].Password)
 		if err != nil {
 			return nil, err
 		}
@@ -116,7 +116,7 @@ func (s Service) ListEntities(ctx *gin.Context) ([]models.Entity, error) {
 	return entities, nil
 }
 
-func (s Service) encryptPassword(password string) (string, error) {
+func (s Service) Encrypt(text string) (string, error) {
 
 	iv, err := hex.DecodeString(s.cfg.EntitySecretVector)
 	if err != nil {
@@ -127,14 +127,14 @@ func (s Service) encryptPassword(password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	plainText := []byte(password)
+	plainText := []byte(text)
 	cfb := cipher.NewCFBEncrypter(block, iv)
 	cipherText := make([]byte, len(plainText))
 	cfb.XORKeyStream(cipherText, plainText)
 	return Encode(cipherText), nil
 }
 
-func (s Service) decryptPassword(password string) (string, error) {
+func (s Service) decrypt(text string) (string, error) {
 
 	iv, err := hex.DecodeString(s.cfg.EntitySecretVector)
 	if err != nil {
@@ -146,7 +146,7 @@ func (s Service) decryptPassword(password string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	cipherText := Decode(password)
+	cipherText := Decode(text)
 	cfb := cipher.NewCFBDecrypter(block, iv)
 	plainText := make([]byte, len(cipherText))
 	cfb.XORKeyStream(plainText, cipherText)
