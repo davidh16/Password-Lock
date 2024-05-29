@@ -3,7 +3,7 @@ package service
 import (
 	"crypto/aes"
 	"crypto/cipher"
-	"encoding/base32"
+	"encoding/base64"
 	"encoding/hex"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -155,11 +155,11 @@ func (s Service) decryptEntity(text string) (string, error) {
 }
 
 func Encode(b []byte) string {
-	return base32.StdEncoding.EncodeToString(b)
+	return base64.StdEncoding.EncodeToString(b)
 }
 
 func Decode(s string) []byte {
-	data, err := base32.StdEncoding.DecodeString(s)
+	data, err := base64.StdEncoding.DecodeString(s)
 	if err != nil {
 		panic(err)
 	}

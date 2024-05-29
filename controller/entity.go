@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"net/http"
@@ -188,7 +189,7 @@ func (c Controller) GetEntity(ctx *gin.Context) {
 		})
 	}
 
-	encryptedResponse, err := c.encryptResponse(string(response))
+	encryptedResponse, err := c.encryptResponse(base64.StdEncoding.EncodeToString(response))
 
 	ctx.JSON(200, encryptedResponse)
 
