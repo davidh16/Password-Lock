@@ -261,7 +261,11 @@ func (c Controller) CompleteRegistration(ctx *gin.Context) {
 
 func (c Controller) Login(ctx *gin.Context) {
 
-	var credentials models.User
+	var credentials struct {
+		EmailAddress string `json:"email_address"`
+		Password     string `json:"password"`
+		RememberMe   bool   `json:"remember_me"`
+	}
 
 	// decoding json message to user model
 	err := json.NewDecoder(ctx.Request.Body).Decode(&credentials)
@@ -273,7 +277,7 @@ func (c Controller) Login(ctx *gin.Context) {
 		return
 	}
 
-	user, err := c.service.Authenticate(credentials)
+	user, err := c.service.Authenticate(credentials.EmailAddress, credentials.Password)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusUnauthorized,
@@ -291,7 +295,12 @@ func (c Controller) Login(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("session", sessionKey, 600, "/", "", true, false)
+	cookieLifeTime := int(time.Minute * 10)
+	if credentials.RememberMe {
+		cookieLifeTime = int(time.Hour)
+	}
+
+	ctx.SetCookie("session", sessionKey, cookieLifeTime, "/", "", true, false)
 
 	c.SendResponse(ctx, Response{
 		Status:  http.StatusOK,

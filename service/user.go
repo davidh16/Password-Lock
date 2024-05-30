@@ -70,8 +70,8 @@ func (s Service) CompleteRegistration(ctx *gin.Context, user *models.User, perso
 	return user, nil
 }
 
-func (s Service) Authenticate(credentials models.User) (*models.User, error) {
-	user, err := s.userRepository.FindUserByEmailAddress(credentials.EmailAddress)
+func (s Service) Authenticate(emailAddress, password string) (*models.User, error) {
+	user, err := s.userRepository.FindUserByEmailAddress(emailAddress)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func (s Service) Authenticate(credentials models.User) (*models.User, error) {
 		return nil, errors.New("user does not exist")
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(credentials.Password))
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		return nil, err
 	}
