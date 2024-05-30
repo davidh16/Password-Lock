@@ -15,7 +15,7 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 	var entity models.Entity
 
 	// decoding json message to user model
-	err := json.NewDecoder(strings.NewReader(ctx.PostForm("data"))).Decode(&entity)
+	err := json.NewDecoder(strings.NewReader(ctx.PostForm("entity"))).Decode(&entity)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,

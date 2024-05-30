@@ -286,7 +286,12 @@ func (c Controller) Login(ctx *gin.Context) {
 		return
 	}
 
-	sessionKey, err := c.service.GenerateAndSaveSessionKey(user)
+	sessionLifeTime := int(time.Minute * 10)
+	if credentials.RememberMe {
+		sessionLifeTime = int(time.Hour)
+	}
+
+	sessionKey, err := c.service.GenerateAndSaveSessionKey(user.Uuid, time.Duration(sessionLifeTime))
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
@@ -295,12 +300,7 @@ func (c Controller) Login(ctx *gin.Context) {
 		return
 	}
 
-	cookieLifeTime := int(time.Minute * 10)
-	if credentials.RememberMe {
-		cookieLifeTime = int(time.Hour)
-	}
-
-	ctx.SetCookie("session", sessionKey, cookieLifeTime, "/", "", true, false)
+	ctx.SetCookie("session", sessionKey, sessionLifeTime, "/", "", true, false)
 
 	c.SendResponse(ctx, Response{
 		Status:  http.StatusOK,

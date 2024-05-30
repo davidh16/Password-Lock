@@ -3,16 +3,15 @@ package service
 import (
 	"context"
 	"github.com/google/uuid"
-	"password-lock/models"
 	"time"
 )
 
-func (s Service) GenerateAndSaveSessionKey(user *models.User) (string, error) {
+func (s Service) GenerateAndSaveSessionKey(userUuid string, sessionLifeTime time.Duration) (string, error) {
 	ctx := context.Background()
 
 	sessionKey := uuid.New().String()
 
-	err := s.redis.Set(ctx, sessionKey, user.Uuid, time.Minute*10).Err()
+	err := s.redis.Set(ctx, sessionKey, userUuid, sessionLifeTime).Err()
 	if err != nil {
 		return "", err
 	}
