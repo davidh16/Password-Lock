@@ -8,65 +8,56 @@ import (
 	"google.golang.org/api/option"
 	"io"
 	"log"
+	"mime/multipart"
 	"password-lock/config"
 	"strings"
-	"time"
 )
 
-func (s Service) UploadIconToBucket(ctx *gin.Context, entityUuid string) (string, error) {
-
-	file, err := ctx.FormFile("icon") // "file" is the name of the file input field in your HTML form
-	if err != nil {
-		return "", err
-	}
+func (s Service) UploadIconToBucket(ctx *gin.Context, path string, file *multipart.FileHeader) error {
 
 	uploadedFile, err := file.Open()
 	if err != nil {
-		return "", err
+		return err
 	}
 	defer uploadedFile.Close()
 
-	Cfg := config.GetConfig()
+	cfg := config.GetConfig()
 
 	opt := option.WithCredentialsFile("password-lock-486ee-firebase-adminsdk-xtd5c-cc43257771.json")
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	// Initialize Firebase Storage client
 	client, err := app.Storage(context.Background())
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	// Create a storage reference
-	storageRef, err := client.Bucket(Cfg.StorageBucket)
+	storageRef, err := client.Bucket(cfg.StorageBucket)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
-
-	me := ctx.Value("me").(string)
-
-	path := strings.Join([]string{me, entityUuid}, "/")
+	//ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
+	//defer cancel()
 
 	object := storageRef.Object(path)
 
 	// Upload the file to Firebase Storage
-	wc := object.NewWriter(ctxWithTimeout)
+	wc := object.NewWriter(context.Background())
 	_, err = io.Copy(wc, uploadedFile)
 	if err != nil {
-		return "", err
+		return err
 	}
 	err = wc.Close()
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	return path, nil
+	return nil
 }
 
 func (s Service) DownloadEntityIcon(ctx *gin.Context, entityUuid string) ([]byte, error) {

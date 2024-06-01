@@ -14,7 +14,6 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 
 	var entity models.Entity
 
-	// decoding json message to user model
 	err := json.NewDecoder(strings.NewReader(ctx.PostForm("entity"))).Decode(&entity)
 	if err != nil {
 		c.SendResponse(ctx, Response{
@@ -55,7 +54,7 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 	}
 
 	if entity.Type == 6 {
-		path, err := c.service.UploadIconToBucket(ctx, createdEntity.Uuid)
+		file, err := ctx.FormFile("file") // "file" is the name of the file input field in your HTML form
 		if err != nil {
 			c.SendResponse(ctx, Response{
 				Status: http.StatusInternalServerError,
@@ -64,7 +63,19 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 			return
 		}
 
-		createdEntity.IconPath = path
+		path := strings.Join([]string{me, createdEntity.Uuid}, "/")
+
+		err = c.service.UploadIconToBucket(ctx, createdEntity.Uuid, file)
+		if err != nil {
+			c.SendResponse(ctx, Response{
+				Status: http.StatusInternalServerError,
+				Error:  err.Error(),
+			})
+			return
+		}
+
+		createdEntity.IconPath = strings.Join([]string{path, file.Filename}, "/")
+
 		err = c.service.UpdateEntity(ctx, createdEntity)
 		if err != nil {
 			c.SendResponse(ctx, Response{

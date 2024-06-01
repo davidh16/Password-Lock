@@ -44,13 +44,17 @@ func (s Service) UpdateEntity(ctx *gin.Context, updatedEntity *models.Entity) er
 		return result.Error
 	}
 
-	if ctx.Value("encryption").(bool) {
-		encryptedPassword, err := s.encryptEntity(updatedEntity.Password)
-		if err != nil {
-			return err
-		}
+	value := ctx.Value("encryption")
+	if value != nil {
+		encryption := value.(bool)
+		if encryption {
+			encryptedPassword, err := s.encryptEntity(updatedEntity.Password)
+			if err != nil {
+				return err
+			}
 
-		updatedEntity.Password = encryptedPassword
+			updatedEntity.Password = encryptedPassword
+		}
 	}
 
 	entity.Merge(updatedEntity)
