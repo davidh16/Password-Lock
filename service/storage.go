@@ -1,16 +1,15 @@
 package service
 
 import (
-	"bytes"
+	"cloud.google.com/go/storage"
 	"context"
 	"firebase.google.com/go"
 	"github.com/gin-gonic/gin"
 	"google.golang.org/api/option"
 	"io"
-	"log"
 	"mime/multipart"
 	"password-lock/config"
-	"strings"
+	"time"
 )
 
 func (s Service) UploadIconToBucket(ctx *gin.Context, path string, file *multipart.FileHeader) error {
@@ -60,49 +59,58 @@ func (s Service) UploadIconToBucket(ctx *gin.Context, path string, file *multipa
 	return nil
 }
 
-func (s Service) DownloadEntityIcon(ctx *gin.Context, entityUuid string) ([]byte, error) {
+func (s Service) GetEntityIconSignedUrl(ctx *gin.Context, path string) (string, error) {
 
 	Cfg := config.GetConfig()
 
 	opt := option.WithCredentialsFile("password-lock-486ee-firebase-adminsdk-xtd5c-cc43257771.json")
 	app, err := firebase.NewApp(ctx, nil, opt)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	// Initialize Firebase Storage client
 	client, err := app.Storage(context.Background())
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	// Create a storage reference
 	storageRef, err := client.Bucket(Cfg.StorageBucket)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	me := ctx.Value("me").(string)
-
-	path := strings.Join([]string{me, entityUuid}, "/")
-
-	object := storageRef.Object(path)
+	signedUrl, err := storageRef.SignedURL(path, &storage.SignedURLOptions{
+		Expires: time.Now().AddDate(100, 0, 0),
+		Method:  "GET",
+	},
+	)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
-	reader, err := object.NewReader(context.Background())
-	if err != nil {
-		return nil, err
-	}
+	return signedUrl, nil
 
-	var buffer bytes.Buffer
-
-	// Copy the remote file's data to the buffer.
-	_, err = io.Copy(&buffer, reader)
-	if err != nil {
-		log.Fatalf("Error reading file content: %v", err)
-	}
-
-	return buffer.Bytes(), nil
+	//path := strings.Join([]string{me, entityUuid}, "/")
+	//
+	//object := storageRef.Object(path)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//reader, err := object.NewReader(context.Background())
+	//if err != nil {
+	//	return nil, err
+	//}
+	//
+	//var buffer bytes.Buffer
+	//
+	//// Copy the remote file's data to the buffer.
+	//_, err = io.Copy(&buffer, reader)
+	//if err != nil {
+	//	log.Fatalf("Error reading file content: %v", err)
+	//}
+	//
+	//return buffer.Bytes(), nil
 }

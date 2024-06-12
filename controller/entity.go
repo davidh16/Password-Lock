@@ -63,9 +63,9 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 			return
 		}
 
-		path := strings.Join([]string{me, createdEntity.Uuid}, "/")
+		path := strings.Join([]string{me, createdEntity.Uuid, file.Filename}, "/")
 
-		err = c.service.UploadIconToBucket(ctx, createdEntity.Uuid, file)
+		err = c.service.UploadIconToBucket(ctx, path, file)
 		if err != nil {
 			c.SendResponse(ctx, Response{
 				Status: http.StatusInternalServerError,
@@ -74,7 +74,7 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 			return
 		}
 
-		createdEntity.IconPath = strings.Join([]string{path, file.Filename}, "/")
+		createdEntity.IconPath = path
 
 		err = c.service.UpdateEntity(ctx, createdEntity)
 		if err != nil {
@@ -233,15 +233,39 @@ func (c Controller) ListEntities(ctx *gin.Context) {
 	ctx.JSON(200, encryptedResponse)
 }
 
-func (c Controller) DownloadEntityIcon(ctx *gin.Context) {
+func (c Controller) GetEntityIconSignedUrl(ctx *gin.Context) {
 
 	entityUuid := ctx.Param("entity_uuid")
 
-	_, err := c.service.DownloadEntityIcon(ctx, entityUuid)
+	entity, err := c.service.GetEntityByUuid(ctx, entityUuid)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusNotFound,
+			Error:  err.Error(),
+		})
+	}
+
+	signedUrl, err := c.service.GetEntityIconSignedUrl(ctx, entity.IconPath)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
 		})
 	}
+
+	data := map[string]interface{}{
+		"signed_url": signedUrl,
+	}
+
+	response, err := json.Marshal(data)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+	}
+
+	encryptedResponse, err := c.encryptResponse(string(response))
+
+	ctx.JSON(200, encryptedResponse)
 }

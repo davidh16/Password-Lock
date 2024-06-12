@@ -15,7 +15,7 @@ func (s Service) GetEntityIconPath(entityType int) string {
 
 	iconType := models.TypeMap[entityType]
 	if iconType != "custom" {
-		return strings.Join([]string{"default", iconType}, "/")
+		return strings.Join([]string{"default", iconType + ".png"}, "/")
 	}
 	return ""
 }

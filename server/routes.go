@@ -30,6 +30,5 @@ func initializeRoutes(r *gin.Engine, ctrl *controller.Controller, m *middleware.
 	r.GET("/entity", m.Auth(), m.User(), ctrl.GetEntity)
 	r.GET("/entity/list", m.Auth(), m.User(), ctrl.ListEntities)
 
-	r.POST("/icon/:entity_uuid", m.Auth(), m.User(), ctrl.DownloadEntityIcon)
-
+	r.GET("/icon/:entity_uuid", m.Auth(), m.User(), ctrl.GetEntityIconSignedUrl)
 }

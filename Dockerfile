@@ -7,7 +7,7 @@ COPY go.sum .
 
 RUN go mod download
 
-RUN go install github.com/cosmtrek/air@latest
+RUN go install github.com/air-verse/air@latest
 RUN go install github.com/go-delve/delve/cmd/dlv@latest
 RUN air init
 
