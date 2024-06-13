@@ -34,6 +34,8 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 
 	if entity.Type < 6 && entity.Type > 0 {
 		entity.IconPath = c.service.GetEntityIconPath(entity.Type)
+	} else {
+		entity.IconPath = c.service.GetEntityIconPath(entity.Type)
 	}
 
 	me := ctx.Value("me").(string)
@@ -132,12 +134,12 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 }
 
 func (c Controller) DeleteEntity(ctx *gin.Context) {
-	var request struct {
-		LoginPassword string `json:"password"`
-	}
 
-	// decoding json message to user model
-	err := json.NewDecoder(ctx.Request.Body).Decode(&request)
+	me := ctx.Value("me").(string)
+
+	entityUuid := ctx.Param("entity_uuid")
+
+	entity, err := c.service.GetEntityByUuid(ctx, entityUuid)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
@@ -146,19 +148,13 @@ func (c Controller) DeleteEntity(ctx *gin.Context) {
 		return
 	}
 
-	me := ctx.Value("me").(string)
-
-	// checking if user has permission to delete an entity
-	err = c.service.Authorize(me, request.LoginPassword)
-	if err != nil {
+	if entity.UserUuid != me {
 		c.SendResponse(ctx, Response{
-			Status: http.StatusUnauthorized,
+			Status: http.StatusForbidden,
 			Error:  err.Error(),
 		})
 		return
 	}
-
-	entityUuid := ctx.Param("entity_uuid")
 
 	err = c.service.DeleteEntity(ctx, entityUuid)
 	if err != nil {
