@@ -286,9 +286,9 @@ func (c Controller) Login(ctx *gin.Context) {
 		return
 	}
 
-	sessionLifeTime := int(time.Minute * 10)
+	sessionLifeTime := int(time.Hour)
 	if credentials.RememberMe {
-		sessionLifeTime = int(time.Hour)
+		sessionLifeTime = int(time.Hour * 24)
 	}
 
 	sessionKey, err := c.service.GenerateAndSaveSessionKey(user.Uuid, time.Duration(sessionLifeTime))
