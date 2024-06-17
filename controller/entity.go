@@ -100,7 +100,7 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 	var updatedEntity *models.Entity
 
 	// decoding json message to user model
-	err := json.NewDecoder(ctx.Request.Body).Decode(&updatedEntity)
+	err := json.NewDecoder(strings.NewReader(ctx.PostForm("entity"))).Decode(&updatedEntity)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
@@ -115,6 +115,28 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 
 	if updatedEntity.Type != 0 {
 		updatedEntity.IconPath = c.service.GetEntityIconPath(updatedEntity.Type)
+	}
+
+	file, _ := ctx.FormFile("file")
+
+	if updatedEntity.Type == 6 || file != nil {
+		var path string
+
+		me := ctx.Value("me").(string)
+		path = strings.Join([]string{me, updatedEntity.Uuid, file.Filename}, "/")
+
+		if file != nil {
+			err = c.service.UploadIconToBucket(ctx, path, file)
+			if err != nil {
+				c.SendResponse(ctx, Response{
+					Status: http.StatusInternalServerError,
+					Error:  err.Error(),
+				})
+				return
+			}
+		}
+
+		updatedEntity.IconPath = path
 	}
 
 	err = c.service.UpdateEntity(ctx, updatedEntity)
