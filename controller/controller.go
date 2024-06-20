@@ -4,6 +4,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"encoding/hex"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"password-lock/service"
@@ -69,4 +70,12 @@ func (c Controller) encryptResponse(text string) (string, error) {
 	cipherText := make([]byte, len(plainText))
 	cfb.XORKeyStream(cipherText, plainText)
 	return service.Encode(cipherText), nil
+}
+
+func ignoreNotFound(err error) error {
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil
+	} else {
+		return err
+	}
 }

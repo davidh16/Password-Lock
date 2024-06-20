@@ -95,9 +95,10 @@ func (s Service) sendEmail(to string, subject string, body string) error {
 
 	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 	subject = "Subject: " + subject + "\n"
-	msg := []byte(subject + mime + "\n" + body)
+	from := fmt.Sprintf("From: %s\n", "Password Lock")
+	msg := []byte(from + subject + mime + "\n" + body)
 
-	auth := smtp.PlainAuth("", s.Cfg.SmtpFrom, s.Cfg.FirebaseAppPassword, s.Cfg.SmtpHost)
+	auth := smtp.PlainAuth("", s.Cfg.SmtpFrom, s.Cfg.SmtpPassword, s.Cfg.SmtpHost)
 
 	// Sending email.
 	err := smtp.SendMail(s.Cfg.SmtpHost+":"+s.Cfg.SmtpPort, auth, s.Cfg.SmtpFrom, receivers, msg)

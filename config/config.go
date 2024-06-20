@@ -22,7 +22,7 @@ type Config struct {
 	SmtpPort              string `env:"SMTP_PORT"`
 	SmtpHost              string `env:"SMTP_HOST"`
 	SmtpFrom              string `env:"SMTP_FROM"`
-	FirebaseAppPassword   string `env:"FIREBASE_APP_PASSWORD"`
+	SmtpPassword          string `env:"SMTP_PASSWORD"`
 	BaseUrl               string `env:"BASE_URL"`
 	DefaultEntityIconPath string `env:"DEFAULT_ENTITY_ICON_PATH"`
 }

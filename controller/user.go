@@ -29,8 +29,8 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 		return
 	}
 
-	err, exists := c.service.IfEmailAddressExists(registerRequest.EmailAddress)
-	if err != nil {
+	exist, err := c.service.GetUserByEmailAddress(registerRequest.EmailAddress)
+	if ignoreNotFound(err) != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
@@ -38,7 +38,7 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 		return
 	}
 
-	if exists {
+	if exist != nil && exist.Active {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusBadRequest,
 			Error:  errors.New("email address already exists").Error(),
@@ -59,22 +59,12 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 		return
 	}
 
-	verificationToken, err := c.service.CreateToken(ctx, user.Uuid, models.TOKEN_TYPE_VERIFICATION)
+	err = c.sendVerificationEmail(ctx, user)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
 			Error:  err.Error(),
 		})
-		return
-	}
-
-	err = c.service.SendVerificationLinkEmail(user.EmailAddress, verificationToken.Token)
-	if err != nil {
-		c.SendResponse(ctx, Response{
-			Status: http.StatusBadRequest,
-			Error:  errors.New("email address is not valid").Error(),
-		})
-		log.Println("failed to send an email")
 		return
 	}
 
@@ -165,18 +155,17 @@ func (c Controller) ResendVerificationEmail(ctx *gin.Context) {
 
 	user, err := c.service.GetUserByEmailAddress(resendVerificationEmailRequest.EmailAddress)
 	if err != nil {
-		if !errors.Is(err, gorm.ErrRecordNotFound) {
-			c.SendResponse(ctx, Response{
-				Status: http.StatusInternalServerError,
-			})
-			return
-		}
-	}
-
-	user, err = c.service.GetUnverifiedUserByEmailAddress(resendVerificationEmailRequest.EmailAddress)
-	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	if user != nil && user.Active {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusBadRequest,
+			Error:  errors.New("email address has already been verified").Error(),
 		})
 		return
 	}
@@ -349,6 +338,18 @@ func (c Controller) ForgotPassword(ctx *gin.Context) {
 	// if user is not found, we can not return that information because of security issues
 	user, err := c.service.GetUserByEmailAddress(forgotPasswordRequest.EmailAddress)
 	if err != nil {
+		var response Response
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			response = Response{
+				Status: http.StatusOK,
+			}
+		} else {
+			response = Response{
+				Status: http.StatusInternalServerError,
+				Error:  err.Error(),
+			}
+		}
+		c.SendResponse(ctx, response)
 		return
 	}
 
@@ -571,4 +572,19 @@ func (c Controller) Me(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusOK, me)
+}
+
+func (c Controller) sendVerificationEmail(ctx *gin.Context, user *models.User) error {
+	verificationToken, err := c.service.CreateToken(ctx, user.Uuid, models.TOKEN_TYPE_VERIFICATION)
+	if err != nil {
+		return err
+	}
+
+	err = c.service.SendVerificationLinkEmail(user.EmailAddress, verificationToken.Token)
+	if err != nil {
+		log.Println("failed to send an email")
+		return nil
+	}
+
+	return nil
 }

@@ -76,7 +76,7 @@ func (s Service) Authenticate(emailAddress, password string) (*models.User, erro
 		return nil, err
 	}
 
-	if user == nil {
+	if user == nil || (user != nil && !user.Active) {
 		return nil, errors.New("user does not exist")
 	}
 
@@ -115,32 +115,8 @@ func (s Service) Me(ctx *gin.Context) (*models.User, error) {
 	return me, nil
 }
 
-func (s Service) IfEmailAddressExists(emailAddress string) (error, bool) {
-	user, err := s.userRepository.FindUserByEmailAddress(emailAddress)
-	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return nil, false
-		} else {
-			return err, false
-		}
-	}
-	if user != nil {
-		return nil, true
-	} else {
-		return nil, false
-	}
-}
-
 func (s Service) GetUserByEmailAddress(emailAddress string) (*models.User, error) {
 	user, err := s.userRepository.FindUserByEmailAddress(emailAddress)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
-}
-
-func (s Service) GetUnverifiedUserByEmailAddress(emailAddress string) (*models.User, error) {
-	user, err := s.userRepository.FindUnverifiedUserByEmailAddress(emailAddress)
 	if err != nil {
 		return nil, err
 	}
