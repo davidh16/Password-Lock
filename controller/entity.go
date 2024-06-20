@@ -222,7 +222,6 @@ func (c Controller) GetEntity(ctx *gin.Context) {
 	encryptedResponse, err := c.encryptResponse(base64.StdEncoding.EncodeToString(response))
 
 	ctx.JSON(200, encryptedResponse)
-
 }
 
 func (c Controller) ListEntities(ctx *gin.Context) {

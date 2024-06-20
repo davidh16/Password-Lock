@@ -17,6 +17,7 @@ func initializeRoutes(r *gin.Engine, ctrl *controller.Controller, m *middleware.
 	r.POST("/reset-password", ctrl.ResetPassword)
 	r.POST("/resend-verification-email", ctrl.ResendVerificationEmail)
 	r.GET("/list-security-questions", ctrl.ListSecurityQuestions)
+	r.GET("/check-session", m.Session(), nil)
 
 	r.POST("/me", m.Auth(), ctrl.Me)
 	r.POST("/complete-registration", m.Auth(), ctrl.CompleteRegistration)

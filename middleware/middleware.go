@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -44,6 +45,49 @@ func (m *Middleware) Auth() gin.HandlerFunc {
 			ctx.Next()
 			return
 		}
+	}
+}
+
+func (m *Middleware) Session() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+
+		sessionUuid, err := ctx.Cookie("session")
+		if err != nil {
+			data := map[string]interface{}{
+				"is_authenticated": false,
+			}
+
+			response, err := json.Marshal(data)
+			if err != nil {
+				ctx.AbortWithStatus(http.StatusInternalServerError)
+				return
+			}
+
+			ctx.JSON(403, response)
+		}
+
+		var isAuthenticated bool
+		var status int
+
+		loggedInUser, err := m.redis.Get(context.Background(), sessionUuid).Result()
+		if loggedInUser == "" || err != nil {
+			isAuthenticated = false
+			status = http.StatusForbidden
+		} else {
+			isAuthenticated = true
+			status = http.StatusOK
+		}
+
+		data := map[string]interface{}{
+			"is_authenticated": isAuthenticated,
+		}
+		response, err := json.Marshal(data)
+		if err != nil {
+			ctx.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+
+		ctx.JSON(status, response)
 	}
 }
 
