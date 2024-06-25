@@ -59,10 +59,27 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 		var path string
 		file, err := ctx.FormFile("file")
 		if err != nil || file == nil {
-			c.SendResponse(ctx, Response{
-				Status:  http.StatusOK,
-				Message: "entity successfully created",
-			})
+			data := map[string]interface{}{
+				"entity": createdEntity,
+			}
+
+			response, err := json.Marshal(data)
+			if err != nil {
+				c.SendResponse(ctx, Response{
+					Status: http.StatusInternalServerError,
+					Error:  err.Error(),
+				})
+			}
+
+			encryptedResponse, err := c.encryptResponse(string(response))
+			if err != nil {
+				c.SendResponse(ctx, Response{
+					Status: http.StatusInternalServerError,
+					Error:  err.Error(),
+				})
+			}
+
+			ctx.JSON(http.StatusCreated, encryptedResponse)
 			return
 		} else {
 			path = strings.Join([]string{me, createdEntity.Uuid, file.Filename}, "/")
@@ -89,10 +106,27 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 		}
 	}
 
-	c.SendResponse(ctx, Response{
-		Status:  http.StatusOK,
-		Message: "entity successfully created",
-	})
+	data := map[string]interface{}{
+		"entity": createdEntity,
+	}
+
+	response, err := json.Marshal(data)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+	}
+
+	encryptedResponse, err := c.encryptResponse(string(response))
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+	}
+
+	ctx.JSON(http.StatusCreated, encryptedResponse)
 	return
 }
 
@@ -109,17 +143,8 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 		return
 	}
 
-	if updatedEntity.Password != "" {
-		ctx.Set("encryption", true)
-	}
-
-	if updatedEntity.Type != 0 {
-		updatedEntity.IconPath = c.service.GetEntityIconPath(updatedEntity.Type)
-	}
-
 	file, _ := ctx.FormFile("file")
-
-	if updatedEntity.Type == 6 || file != nil {
+	if file != nil {
 		var path string
 
 		me := ctx.Value("me").(string)
@@ -148,12 +173,28 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 		return
 	}
 
-	c.SendResponse(ctx, Response{
-		Status:  http.StatusOK,
-		Message: "entity successfully updated",
-	})
-	return
+	data := map[string]interface{}{
+		"entity": updatedEntity,
+	}
 
+	response, err := json.Marshal(data)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+	}
+
+	encryptedResponse, err := c.encryptResponse(string(response))
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+	}
+
+	ctx.JSON(http.StatusCreated, encryptedResponse)
+	return
 }
 
 func (c Controller) DeleteEntity(ctx *gin.Context) {

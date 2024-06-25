@@ -1,5 +1,7 @@
 package models
 
+import "reflect"
+
 type Entity struct {
 	Uuid         string  `json:"uuid" gorm:"unique;type:uuid; column:uuid;default:uuid_generate_v4()"`
 	Name         string  `json:"name,omitempty"`
@@ -33,37 +35,28 @@ func (e *Entity) TableName() string {
 
 func (e *Entity) Merge(data *Entity) {
 
-	if data.Name != "" {
+	if !reflect.DeepEqual(e.Name, data.Name) {
 		e.Name = data.Name
 	}
 
-	if data.EmailAddress != nil {
-		if *data.EmailAddress != "" {
-			e.EmailAddress = data.EmailAddress
-		}
+	if !reflect.DeepEqual(e.EmailAddress, data.EmailAddress) {
+		e.EmailAddress = data.EmailAddress
 	}
 
-	if data.Username != nil {
-		if *data.Username != "" {
-			e.Username = data.Username
-		}
+	if !reflect.DeepEqual(e.Username, data.Username) {
+		e.Username = data.Username
 	}
 
-	if data.IconPath != "" {
+	if !reflect.DeepEqual(e.IconPath, data.IconPath) {
 		e.IconPath = data.IconPath
 	}
 
-	if data.Description != nil {
-		if *data.Description != "" {
-			e.Description = data.Description
-		}
+	if !reflect.DeepEqual(e.Description, data.Description) {
+		e.Description = data.Description
 	}
 
 	if data.Type > 0 && data.Type < 7 {
 		e.Type = data.Type
 	}
 
-	if data.Password != "" {
-		e.Password = data.Password
-	}
 }

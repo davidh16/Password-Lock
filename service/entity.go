@@ -8,6 +8,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"password-lock/models"
+	"reflect"
 	"strings"
 )
 
@@ -44,20 +45,25 @@ func (s Service) UpdateEntity(ctx *gin.Context, updatedEntity *models.Entity) er
 		return result.Error
 	}
 
-	value := ctx.Value("encryption")
-	if value != nil {
-		encryption := value.(bool)
-		if encryption {
-			encryptedPassword, err := s.encryptEntity(updatedEntity.Password)
-			if err != nil {
-				return err
-			}
+	entity.Merge(updatedEntity)
 
-			updatedEntity.Password = encryptedPassword
-		}
+	if updatedEntity.Type != entity.Type {
+		entity.IconPath = s.GetEntityIconPath(updatedEntity.Type)
 	}
 
-	entity.Merge(updatedEntity)
+	decryptedPassword, err := s.decryptEntity(entity.Password)
+	if err != nil {
+		return err
+	}
+
+	if !reflect.DeepEqual(updatedEntity.Password, decryptedPassword) {
+		encryptedPassword, err := s.encryptEntity(updatedEntity.Password)
+		if err != nil {
+			return err
+		}
+
+		entity.Password = encryptedPassword
+	}
 
 	result = s.entityRepository.Db().Where("uuid=?", updatedEntity.Uuid).Save(&entity)
 	if result.Error != nil {

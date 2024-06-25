@@ -78,9 +78,21 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 
 func (c Controller) VerifyAccount(ctx *gin.Context) {
 
-	tokenString := ctx.Query("token")
+	var verifyRequest struct {
+		Token string `json:"token"`
+	}
 
-	token, err := c.service.GetToken(tokenString)
+	// decoding json message to user model
+	err := json.NewDecoder(ctx.Request.Body).Decode(&verifyRequest)
+	if err != nil {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+			Error:  err.Error(),
+		})
+		return
+	}
+
+	token, err := c.service.GetToken(verifyRequest.Token)
 	if err != nil {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
