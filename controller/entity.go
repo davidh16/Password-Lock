@@ -59,6 +59,9 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 		var path string
 		file, err := ctx.FormFile("file")
 		if err != nil || file == nil {
+
+			createdEntity.Password = entity.Password
+
 			data := map[string]interface{}{
 				"entity": createdEntity,
 			}
@@ -105,6 +108,8 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 			return
 		}
 	}
+
+	createdEntity.Password = entity.Password
 
 	data := map[string]interface{}{
 		"entity": createdEntity,
