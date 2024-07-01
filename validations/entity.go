@@ -10,15 +10,8 @@ func ValidateCreateEntityRequest(entity models.Entity) error {
 		return errors.New("validation error : invalid email address")
 	}
 
-	if entity.EmailAddress == nil {
-
-		if entity.Username == nil {
-			return errors.New("validation error : email address or username must be provided")
-		}
-
-		if entity.Username != nil && *entity.Username == "" {
-			return errors.New("validation error : invalid username")
-		}
+	if entity.Username != nil && *entity.Username == "" {
+		return errors.New("validation error : invalid username")
 	}
 
 	if entity.Type > 6 && entity.Type < 1 {
