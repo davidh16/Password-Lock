@@ -2,6 +2,7 @@ package server
 
 import (
 	"github.com/gin-gonic/gin"
+	"password-lock/config"
 	"password-lock/controller"
 	mw "password-lock/middleware"
 )
@@ -11,9 +12,10 @@ type Server struct {
 	router     *gin.Engine
 }
 
-func NewServer(ctrl *controller.Controller, middleware *mw.Middleware) Server {
+func NewServer(ctrl *controller.Controller, middleware *mw.Middleware, cfg *config.Config) Server {
 
 	router := gin.Default()
+	gin.SetMode(cfg.GinMode)
 	router.Use(middleware.CORS())
 
 	initializeRoutes(router, ctrl, middleware)

@@ -25,6 +25,7 @@ type Config struct {
 	SmtpPassword          string `env:"SMTP_PASSWORD"`
 	BaseUrl               string `env:"BASE_URL"`
 	DefaultEntityIconPath string `env:"DEFAULT_ENTITY_ICON_PATH"`
+	GinMode               string `env:"GIN_MODE"`
 }
 
 func GetConfig() *Config {

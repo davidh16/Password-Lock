@@ -3,6 +3,7 @@ package middleware
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -27,18 +28,19 @@ func (m *Middleware) Auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		sessionUuid, err := ctx.Cookie("session")
 		if err != nil {
-			ctx.AbortWithStatus(http.StatusProxyAuthRequired)
+			ctx.JSON(http.StatusProxyAuthRequired, "session expired")
+			//ctx.AbortWithError(http.StatusProxyAuthRequired, errors.New("session expired"))
 			return
 		}
 
 		loggedInUser, err := m.redis.Get(context.Background(), sessionUuid).Result()
 		if err != nil {
-			ctx.AbortWithStatus(http.StatusProxyAuthRequired)
+			ctx.AbortWithError(http.StatusProxyAuthRequired, errors.New("session expired"))
 			return
 		}
 
 		if loggedInUser == "" {
-			ctx.AbortWithStatus(http.StatusProxyAuthRequired)
+			ctx.AbortWithError(http.StatusProxyAuthRequired, errors.New("session expired"))
 			return
 		} else {
 			ctx.Set("me", loggedInUser)
@@ -124,5 +126,7 @@ func (m *Middleware) CORS() gin.HandlerFunc {
 			c.AbortWithStatus(204)
 			return
 		}
+
+		c.Next()
 	}
 }

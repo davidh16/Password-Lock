@@ -12,7 +12,7 @@ import (
 
 func main() {
 
-	Cfg := config.GetConfig()
+	cfg := config.GetConfig()
 
 	redis := db.ConnectToRedis()
 
@@ -24,7 +24,7 @@ func main() {
 
 	svc := service.NewService(
 		redis,
-		Cfg,
+		cfg,
 		userRepo,
 		entityRepo,
 		tokenRepo,
@@ -34,7 +34,7 @@ func main() {
 
 	middleware := mw.InitializeMiddleware(pgInstance, redis)
 
-	srv := server.NewServer(ctrl, middleware)
+	srv := server.NewServer(ctrl, middleware, cfg)
 
 	// Listen and Server in 0.0.0.0:8080
 	srv.Run(":8080")
