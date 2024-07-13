@@ -167,6 +167,10 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 		}
 
 		updatedEntity.IconPath = path
+	} else {
+		if updatedEntity.Type != 6 {
+			updatedEntity.IconPath = c.service.GetEntityIconPath(updatedEntity.Type)
+		}
 	}
 
 	err = c.service.UpdateEntity(ctx, updatedEntity)
