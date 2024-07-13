@@ -1,8 +1,8 @@
 version: "3.9"
 
 services:
-  password-locker:
-    container_name: password-locker
+  password-lock:
+    container_name: password-lock-backend
     volumes:
       - /Users/davidhorvat/GolandProjects/password-lock:/app
     build:
@@ -12,6 +12,8 @@ services:
     ports:
       - "8085:8080"
       - "15850:2345"
+    networks:
+      - password-lock-backend
   postgres:
     image: postgres
     container_name: postgres
@@ -24,13 +26,20 @@ services:
       POSTGRES_DB: "postgres"
     ports:
       - "5434:5432"
+    networks:
+      - password-lock-backend
   redis:
     image: redis
     ports:
       - "6379:6379"
-#    volumes:
-#      - redis-data:/var/lib/redis/data
+    networks:
+      - password-lock-backend
 
 volumes:
   postgres-data:
     driver: local
+
+networks:
+  password-lock-backend:
+    name: password-lock
+    driver: bridge

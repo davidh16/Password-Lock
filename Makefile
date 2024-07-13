@@ -34,13 +34,13 @@ rollback:
 
 up:
 	docker-compose up -d --build
-	docker-compose logs -f password-locker
+	docker-compose logs -f password-lock
 
 down:
 	docker-compose down
 
 start:
-	docker-compose up password-locker
+	docker-compose up password-lock
 
 stop:
-	docker stop password-locker
+	docker stop password-lock
