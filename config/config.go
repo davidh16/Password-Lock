@@ -14,6 +14,7 @@ type Config struct {
 	PgUrl                 string `env:"PG_URL"`
 	RedisHost             string `env:"REDIS_HOST"`
 	RedisPort             string `env:"REDIS_PORT"`
+	RedisPassword         string `env:"REDIS_PASSWORD"`
 	Port                  string `env:"PORT"`
 	UserSecretKey         string `env:"USER_SECRET_KEY"`
 	EntitySecretKey       string `env:"ENTITY_SECRET_KEY"`

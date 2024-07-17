@@ -2,13 +2,13 @@ version: "3.9"
 
 services:
   password-lock:
-    container_name: password-lock-backend
+    container_name: backend
     volumes:
       - /Users/davidhorvat/GolandProjects/password-lock:/app
     build:
       context: .
       dockerfile: Dockerfile
-      target: debug
+      target: local
     ports:
       - "8085:8080"
       - "15850:2345"
