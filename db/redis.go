@@ -4,13 +4,14 @@ import (
 	"context"
 	"fmt"
 	"github.com/redis/go-redis/v9"
+	"password-lock/config"
 )
 
-func ConnectToRedis() *redis.Client {
+func ConnectToRedis(cfg *config.Config) *redis.Client {
 	client := redis.NewClient(&redis.Options{
-		Addr:     "redis:6379", // Redis server address and port
-		Password: "",           // Redis password, leave empty if no password is set
-		DB:       0,            // Redis database number
+		Addr:     fmt.Sprintf("%s:%s", cfg.RedisHost, cfg.RedisPort),
+		Password: "",
+		DB:       0,
 	})
 
 	_, err := client.Ping(context.Background()).Result()

@@ -1,6 +1,9 @@
 package models
 
-import "reflect"
+import (
+	"password-lock/db"
+	"reflect"
+)
 
 type Entity struct {
 	Uuid         string  `json:"uuid" gorm:"unique;type:uuid; column:uuid;default:uuid_generate_v4()"`
@@ -30,7 +33,7 @@ func (e *Entity) HidePassword() *Entity {
 }
 
 func (e *Entity) TableName() string {
-	return "entities"
+	return db.ENTITIES_TABLE
 }
 
 func (e *Entity) Merge(data *Entity) {

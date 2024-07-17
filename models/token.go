@@ -2,6 +2,7 @@ package models
 
 import (
 	"github.com/go-playground/validator/v10"
+	"password-lock/db"
 	"time"
 )
 
@@ -35,4 +36,8 @@ var TokenValidateRules = map[string]string{
 	"Token":     "required",
 	"TokenType": "required,oneof=forgot_password verification new_email delete_account password_reset",
 	"ExpireAt":  "required",
+}
+
+func (e *Token) TableName() string {
+	return db.TOKENS_TABLE
 }

@@ -14,9 +14,9 @@ func main() {
 
 	cfg := config.GetConfig()
 
-	redis := db.ConnectToRedis()
+	redis := db.ConnectToRedis(cfg)
 
-	pgInstance := db.ConnectToDatabase()
+	pgInstance := db.ConnectToDatabase(cfg)
 
 	userRepo := repository.NewUserRepository(pgInstance)
 	entityRepo := repository.NewEntityRepository(pgInstance)

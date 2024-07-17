@@ -1,6 +1,9 @@
 package models
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"password-lock/db"
+)
 
 type PersonalQuestion struct {
 	Uuid     string `json:"uuid" gorm:"unique;type:uuid; column:uuid;default:uuid_generate_v4()"`
@@ -15,11 +18,11 @@ type UserPersonalQuestion struct {
 }
 
 func (p PersonalQuestion) TableName() string {
-	return "personal_questions"
+	return db.PERSONAL_QUESTIONS_TABLE
 }
 
 func (p UserPersonalQuestion) TableName() string {
-	return "user_personal_questions"
+	return db.USER_PERSONAL_QUESTIONS_TABLE
 }
 
 func (p UserPersonalQuestion) MarshalJSON() ([]byte, error) {

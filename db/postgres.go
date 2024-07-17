@@ -8,9 +8,8 @@ import (
 	"password-lock/config"
 )
 
-func ConnectToDatabase() *gorm.DB {
-	Cfg := config.GetConfig()
-	db, err := gorm.Open(postgres.Open(Cfg.PgUrl), nil)
+func ConnectToDatabase(cfg *config.Config) *gorm.DB {
+	db, err := gorm.Open(postgres.Open(cfg.PgUrl), nil)
 	if err != nil {
 		log.Panic("Could not connect to database: ", err.Error())
 	}
