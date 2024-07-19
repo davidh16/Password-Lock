@@ -8,10 +8,19 @@ import (
 	"os"
 )
 
-// Config struct can be expanded if more env variables are introduced
+const (
+	LOCAL_ENVIRONEMNT      = "local"
+	DEBUG_ENVIRONMENT      = "debug"
+	PRODUCTION_ENVIRONMENT = "production"
+)
 
+// Config struct can be expanded if more env variables are introduced
 type Config struct {
 	PgUrl                 string `env:"PG_URL"`
+	DbHost                string `env:"DB_HOST"`
+	DbUser                string `env:"DB_USER"`
+	DbPassword            string `env:"DB_PASSWORD"`
+	DbName                string `env:"DB_NAME"`
 	RedisHost             string `env:"REDIS_HOST"`
 	RedisPort             string `env:"REDIS_PORT"`
 	RedisPassword         string `env:"REDIS_PASSWORD"`
@@ -29,6 +38,7 @@ type Config struct {
 	BaseUrl               string `env:"BASE_URL"`
 	DefaultEntityIconPath string `env:"DEFAULT_ENTITY_ICON_PATH"`
 	GinMode               string `env:"GIN_MODE"`
+	Environment           string `env:"ENVIRONMENT"`
 }
 
 func GetConfig() *Config {
