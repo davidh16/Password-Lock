@@ -14,27 +14,26 @@ import (
 func ConnectToDatabase(cfg *config.Config) *gorm.DB {
 
 	if cfg.Environment != config.LOCAL_ENVIRONEMNT {
-		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", cfg.DbHost, cfg.DbUser, cfg.DbPassword, cfg.DbName)
-		db, err := sql.Open(
-			"cloudsql-postgres",
-			dsn,
-		)
+
+		dbURI := fmt.Sprintf("user=%s password=%s database=%s host=%s",
+			cfg.DbUser, cfg.DbPassword, cfg.DbName, cfg.DbHost)
+
+		// dbPool is the pool of database connections.
+		dbPool, err := sql.Open("pgx", dbURI)
 		if err != nil {
-			log.Println("Could not connect to database: ", err.Error())
+			log.Fatalf("sql.Open: %w", err)
+		}
+
+		db, err := gorm.Open(postgres.New(postgres.Config{
+			Conn: dbPool,
+		}), &gorm.Config{})
+		if err != nil {
+			log.Fatalf("Could not connect to database: %s", err.Error())
 		} else {
 			log.Println(" Successfully connected to database")
 		}
 
-		gormDb, err := gorm.Open(postgres.New(postgres.Config{
-			Conn: db,
-		}), nil)
-		if err != nil {
-			log.Println("Could not connect to database: ", err.Error())
-		} else {
-			log.Println(" Successfully connected to database")
-		}
-
-		return gormDb
+		return db
 	}
 
 	dsn := fmt.Sprintf("postgres://%s:%s@postgres:5432/%s?sslmode=disable", cfg.DbUser, cfg.DbPassword, cfg.DbName)

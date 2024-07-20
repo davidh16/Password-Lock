@@ -43,4 +43,4 @@ start:
 	docker-compose up password-lock
 
 stop:
-	docker stop password-lock
+	docker stop backend
