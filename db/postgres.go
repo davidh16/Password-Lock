@@ -1,10 +1,9 @@
 package db
 
 import (
-	_ "cloud.google.com/go/cloudsqlconn"
-	_ "cloud.google.com/go/cloudsqlconn/postgres/pgxv5"
 	"database/sql"
 	"fmt"
+	_ "github.com/jackc/pgx/v5/stdlib"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
