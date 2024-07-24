@@ -1,10 +1,10 @@
 package config
 
 import (
+	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/tkanos/gonfig"
 	"golang.org/x/oauth2/google"
-	"log"
 )
 
 const (
@@ -48,12 +48,12 @@ func GetConfig() *Config {
 	// fileName could be changed dynamically if there are more env files (like production env and development env ), but for the purpose of this app, it will be hardcoded
 	//fileName := ".env"
 	if err := godotenv.Load(); err != nil {
-		log.Panic("Failed to load .env file")
+		fmt.Println("Failed to load .env file")
 	}
 
 	err := gonfig.GetConf("", configuration)
 	if err != nil {
-		log.Panic(err.Error())
+		fmt.Println(err.Error())
 	}
 
 	return configuration
