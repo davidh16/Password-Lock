@@ -9,6 +9,8 @@ RUN go mod download
 
 COPY . .
 
+EXPOSE 8080
+
 FROM base as local
 
 ENV GIN_MODE=debug

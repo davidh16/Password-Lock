@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"password-lock/config"
 	"password-lock/controller"
 	"password-lock/db"
@@ -37,5 +38,5 @@ func main() {
 	srv := server.NewServer(ctrl, middleware, cfg)
 
 	// Listen and Server in 0.0.0.0:8080
-	srv.Run(":8080")
+	srv.Run(fmt.Sprintf("0.0.0.0:%s", cfg.Port))
 }
