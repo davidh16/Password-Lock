@@ -8,6 +8,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
 	"net/http"
+	"password-lock/config"
 	"password-lock/db"
 	"password-lock/models"
 )
@@ -15,12 +16,14 @@ import (
 type Middleware struct {
 	db    *gorm.DB
 	redis *redis.Client
+	cfg   *config.Config
 }
 
-func InitializeMiddleware(db *gorm.DB, redis *redis.Client) *Middleware {
+func InitializeMiddleware(db *gorm.DB, redis *redis.Client, cfg *config.Config) *Middleware {
 	return &Middleware{
 		db:    db,
 		redis: redis,
+		cfg:   cfg,
 	}
 }
 
@@ -117,7 +120,9 @@ func (m *Middleware) User() gin.HandlerFunc {
 
 func (m *Middleware) CORS() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "http://localhost:5713")
+
+		c.Writer.Header().Set("Access-Control-Allow-Origin", m.cfg.FrontendBaseUrl)
+
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT")

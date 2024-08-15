@@ -34,7 +34,9 @@ type Config struct {
 	SmtpHost                        string `env:"SMTP_HOST"`
 	SmtpFrom                        string `env:"SMTP_FROM"`
 	SmtpPassword                    string `env:"SMTP_PASSWORD"`
-	BaseUrl                         string `env:"BASE_URL"`
+	localFrontendBaseUrl            string `env:"LOCAL_FRONTEND_BASE_URL"`
+	debugFrontendBaseUrl            string `env:"DEBUG_FRONTEND_BASE_URL"`
+	FrontendBaseUrl                 string
 	DefaultEntityIconPath           string `env:"DEFAULT_ENTITY_ICON_PATH"`
 	GinMode                         string `env:"GIN_MODE"`
 	Environment                     string `env:"ENVIRONMENT"`
@@ -54,6 +56,15 @@ func GetConfig() *Config {
 	err := gonfig.GetConf("", configuration)
 	if err != nil {
 		fmt.Println(err.Error())
+	}
+
+	switch configuration.Environment {
+	case "local":
+		configuration.FrontendBaseUrl = configuration.localFrontendBaseUrl
+	case "debug":
+		configuration.FrontendBaseUrl = configuration.debugFrontendBaseUrl
+	default:
+		configuration.FrontendBaseUrl = configuration.localFrontendBaseUrl
 	}
 
 	return configuration

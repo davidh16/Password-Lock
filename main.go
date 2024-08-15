@@ -13,8 +13,6 @@ import (
 
 func main() {
 
-	fmt.Println("test")
-
 	cfg := config.GetConfig()
 
 	redis := db.ConnectToRedis(cfg)
@@ -35,7 +33,7 @@ func main() {
 
 	ctrl := controller.NewController(svc)
 
-	middleware := mw.InitializeMiddleware(pgInstance, redis)
+	middleware := mw.InitializeMiddleware(pgInstance, redis, cfg)
 
 	srv := server.NewServer(ctrl, middleware, cfg)
 
