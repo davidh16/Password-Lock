@@ -13,8 +13,6 @@ import (
 
 func main() {
 
-	fmt.Println("test")
-
 	cfg := config.GetConfig()
 
 	redis := db.ConnectToRedis(cfg)
