@@ -67,5 +67,7 @@ func GetConfig() *Config {
 		configuration.FrontendBaseUrl = configuration.localFrontendBaseUrl
 	}
 
+	fmt.Println(configuration)
+
 	return configuration
 }
