@@ -34,8 +34,8 @@ type Config struct {
 	SmtpHost                        string `env:"SMTP_HOST"`
 	SmtpFrom                        string `env:"SMTP_FROM"`
 	SmtpPassword                    string `env:"SMTP_PASSWORD"`
-	localFrontendBaseUrl            string `env:"LOCAL_FRONTEND_BASE_URL"`
-	debugFrontendBaseUrl            string `env:"DEBUG_FRONTEND_BASE_URL"`
+	LocalFrontendBaseUrl            string `env:"LOCAL_FRONTEND_BASE_URL"`
+	DebugFrontendBaseUrl            string `env:"DEBUG_FRONTEND_BASE_URL"`
 	FrontendBaseUrl                 string
 	DefaultEntityIconPath           string `env:"DEFAULT_ENTITY_ICON_PATH"`
 	GinMode                         string `env:"GIN_MODE"`
@@ -60,11 +60,11 @@ func GetConfig() *Config {
 
 	switch configuration.Environment {
 	case "local":
-		configuration.FrontendBaseUrl = configuration.localFrontendBaseUrl
+		configuration.FrontendBaseUrl = configuration.LocalFrontendBaseUrl
 	case "debug":
-		configuration.FrontendBaseUrl = configuration.debugFrontendBaseUrl
+		configuration.FrontendBaseUrl = configuration.DebugFrontendBaseUrl
 	default:
-		configuration.FrontendBaseUrl = configuration.localFrontendBaseUrl
+		configuration.FrontendBaseUrl = configuration.LocalFrontendBaseUrl
 	}
 
 	fmt.Println(configuration)
