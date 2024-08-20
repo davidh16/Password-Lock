@@ -28,21 +28,6 @@ type Response struct {
 
 func (c Controller) SendResponse(ctx *gin.Context, response Response) {
 
-	xxx, _ := ctx.Get("tx")
-	transactions, _ := xxx.([]*gorm.DB)
-
-	if len(transactions) > 0 {
-		if response.Error != "" {
-			for _, tx := range transactions {
-				tx.Rollback()
-			}
-		} else {
-			for _, tx := range transactions {
-				tx.Commit()
-			}
-		}
-	}
-
 	if len(response.Message) > 0 {
 		ctx.JSON(response.Status, map[string]string{"message": response.Message})
 		return

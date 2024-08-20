@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -46,6 +47,7 @@ func (m *Middleware) Auth() gin.HandlerFunc {
 			ctx.AbortWithError(http.StatusProxyAuthRequired, errors.New("session expired"))
 			return
 		} else {
+			fmt.Println("sve je dobro prošlo")
 			ctx.Set("me", loggedInUser)
 			ctx.Next()
 			return
