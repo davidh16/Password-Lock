@@ -82,25 +82,7 @@ jobs:
          username: _json_key
          password: ${{ secrets.GCR_SERVICE_ACCOUNT_JSON }}
 
-      - name: Parse environment variables
-        uses: infovista-opensource/vars-to-env-action@2.0.0
-        with:
-          secrets: ${{ toJSON(vars) }}
-
-      - name: Create .env file from environment variables
-        run: |-
-          # Create .env file
-          echo "# Generated .env file" > .env
-          
-          # Add all environment variables to .env file
-          printenv | while IFS= read -r line; do
-            key=$(echo $line | cut -d= -f1)
-            value=$(echo $line | cut -d= -f2-)
-            echo "$key=$value" >> .env
-          done
-
-          # Display the contents of the .env file (for debugging purposes)
-          cat .env
+      
 
       # Build and push the Docker image, passing the .env_file
       - name: Build and Push Container
