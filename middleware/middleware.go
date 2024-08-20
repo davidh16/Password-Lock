@@ -30,6 +30,9 @@ func InitializeMiddleware(db *gorm.DB, redis *redis.Client, cfg *config.Config) 
 
 func (m *Middleware) Auth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+
+		fmt.Println("tu smo")
+
 		sessionUuid, err := ctx.Cookie("session")
 		if err != nil {
 			ctx.JSON(http.StatusProxyAuthRequired, "session expired")
@@ -37,11 +40,15 @@ func (m *Middleware) Auth() gin.HandlerFunc {
 			return
 		}
 
+		fmt.Println("session ", sessionUuid)
+
 		loggedInUser, err := m.redis.Get(context.Background(), sessionUuid).Result()
 		if err != nil {
 			ctx.AbortWithError(http.StatusProxyAuthRequired, errors.New("session expired"))
 			return
 		}
+
+		fmt.Println("loggedInUser ", loggedInUser)
 
 		if loggedInUser == "" {
 			ctx.AbortWithError(http.StatusProxyAuthRequired, errors.New("session expired"))
