@@ -35,6 +35,9 @@ func (m *Middleware) Auth() gin.HandlerFunc {
 
 		sessionUuid, err := ctx.Cookie("session")
 		if err != nil {
+
+			fmt.Println("jel error ? ", err)
+
 			ctx.JSON(http.StatusProxyAuthRequired, "session expired")
 			//ctx.AbortWithError(http.StatusProxyAuthRequired, errors.New("session expired"))
 			return
