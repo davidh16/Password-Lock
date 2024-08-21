@@ -2,7 +2,6 @@ package service
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -108,9 +107,6 @@ func (s Service) Authorize(userUuid string, password string) error {
 }
 
 func (s Service) Me(ctx *gin.Context) (*models.User, error) {
-
-	fmt.Println("vjv ovdje pukne")
-
 	me, err := s.userRepository.FindUserByUuid(ctx.Value("me").(string))
 	if err != nil {
 		return nil, err
