@@ -300,6 +300,7 @@ func (c Controller) ListEntities(ctx *gin.Context) {
 	encryptedResponse, err := c.encryptResponse(string(response))
 
 	fmt.Println(string(response))
+	fmt.Println(c.service.Cfg.EntitySecretKey)
 
 	ctx.JSON(200, encryptedResponse)
 }
