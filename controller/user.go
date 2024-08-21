@@ -3,7 +3,6 @@ package controller
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"log"
@@ -205,8 +204,6 @@ func (c Controller) ResendVerificationEmail(ctx *gin.Context) {
 
 func (c Controller) CompleteRegistration(ctx *gin.Context) {
 
-	t1 := time.Now()
-
 	me, err := c.service.Me(ctx)
 	if err != nil {
 		c.SendResponse(ctx, Response{
@@ -216,8 +213,6 @@ func (c Controller) CompleteRegistration(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println(1, time.Since(t1))
-
 	if me.Completed {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusBadRequest,
@@ -225,8 +220,6 @@ func (c Controller) CompleteRegistration(ctx *gin.Context) {
 		})
 		return
 	}
-
-	fmt.Println(2, time.Since(t1))
 
 	var userPersonalQuestions []*models.UserPersonalQuestion
 	err = json.NewDecoder(ctx.Request.Body).Decode(&userPersonalQuestions)
@@ -238,13 +231,9 @@ func (c Controller) CompleteRegistration(ctx *gin.Context) {
 		return
 	}
 
-	fmt.Println(3, time.Since(t1))
-
 	for i, _ := range userPersonalQuestions {
 		userPersonalQuestions[i].UserUuid = me.Uuid
 	}
-
-	fmt.Println(4, time.Since(t1))
 
 	if !validations.IsCompleteRegistrationRequestValid(userPersonalQuestions) {
 		c.SendResponse(ctx, Response{
@@ -253,8 +242,6 @@ func (c Controller) CompleteRegistration(ctx *gin.Context) {
 		})
 		return
 	}
-
-	fmt.Println(5, time.Since(t1))
 
 	me.Completed = true
 
@@ -266,8 +253,6 @@ func (c Controller) CompleteRegistration(ctx *gin.Context) {
 		})
 		return
 	}
-
-	fmt.Println(6, time.Since(t1))
 
 	c.SendResponse(ctx, Response{
 		Status:  http.StatusOK,
