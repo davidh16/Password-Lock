@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"password-lock/models"
@@ -297,6 +298,8 @@ func (c Controller) ListEntities(ctx *gin.Context) {
 	}
 
 	encryptedResponse, err := c.encryptResponse(string(response))
+
+	fmt.Println(string(response))
 
 	ctx.JSON(200, encryptedResponse)
 }
