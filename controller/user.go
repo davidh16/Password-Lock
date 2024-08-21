@@ -301,7 +301,7 @@ func (c Controller) Login(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetSameSite(http.SameSiteLaxMode)
+	ctx.SetSameSite(http.SameSiteNoneMode)
 	ctx.SetCookie("session", sessionKey, sessionLifeTime, "/", "", true, false)
 
 	c.SendResponse(ctx, Response{
