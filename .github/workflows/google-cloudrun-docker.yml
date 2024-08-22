@@ -96,7 +96,7 @@ jobs:
         id: prepare-env
         run: |
           # Convert environment variables to JSON and write to a file
-          echo '${{ toJSON(env) }}' > env_vars.json
+          echo '${{ toJSON(vars) }}' > env_vars.json
           cat env_vars.json
 
           env_vars=$(jq -r 'to_entries | map("\(.key)=\(.value)") | join(",")' env_vars.json)
