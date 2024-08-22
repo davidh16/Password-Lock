@@ -92,36 +92,11 @@ jobs:
 
       # END - Docker auth and build
 
-      - name: Parse environment variables
-        uses: infovista-opensource/vars-to-env-action@2.0.0
-        with:
-          secrets: ${{ toJSON(vars) }}
-
-      - name: Create .env file from environment variables
-        run: |-
-          # Create .env file
-          echo "# Generated .env file" > .env
-          
-          printenv | while IFS= read -r line; do
-            key=$(echo "$line" | cut -d= -f1)
-            value=$(echo "$line" | cut -d= -f2-)
-            echo "$key=$value" >> .env
-          done
-
-          # Display the contents of the .env file (for debugging purposes)
-          cat .env
-
-          # Read environment variables from .env and set them for Cloud Run deployment
-          env_vars=$(awk -F= '{print $1"="$2}' .env | tr '\n' ',' | sed 's/,$//')
-
-          # Set env_vars as an output to use in the next step
-          echo "env_vars=$env_vars" >> $GITHUB_ENV
-
       - name: Deploy to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v0
         with:
-          env_vars: ${{ env.env_vars }}
+          env_vars: ${{ toJSON(vars) }}
           service: ${{ env.SERVICE }}
           region: ${{ env.REGION }}
           image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.SERVICE }}:${{ github.sha }}
