@@ -106,11 +106,17 @@ jobs:
           # Display the contents of the .env file (for debugging purposes)
           cat .env
 
+          # Read environment variables from .env and set them for Cloud Run deployment
+          env_vars=$(awk -F= '{print $1"="$2}' .env | tr '\n' ',' | sed 's/,$//')
+
+          # Set env_vars as an output to use in the next step
+          echo "env_vars=$env_vars" >> $GITHUB_ENV
+
       - name: Deploy to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v0
         with:
-          env_vars_file: ./.env
+          env_vars: ${{ env.env_vars }}
           service: ${{ env.SERVICE }}
           region: ${{ env.REGION }}
           image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.SERVICE }}:${{ github.sha }}
