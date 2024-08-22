@@ -1,10 +1,11 @@
 package service
 
 import (
-	"errors"
-	"github.com/gin-gonic/gin"
+	"context"
+	firebase "firebase.google.com/go"
+	"fmt"
 	"github.com/redis/go-redis/v9"
-	"gorm.io/gorm"
+	"google.golang.org/api/option"
 	"password-lock/config"
 	"password-lock/repository"
 )
@@ -15,6 +16,7 @@ type Service struct {
 	userRepository   repository.UserRepository
 	entityRepository repository.EntityRepository
 	tokenRepository  repository.TokenRepository
+	firebaseApp      *firebase.App
 }
 
 func NewService(redis *redis.Client,
@@ -23,28 +25,19 @@ func NewService(redis *redis.Client,
 	entityRepo repository.EntityRepository,
 	tokenRepo repository.TokenRepository,
 ) Service {
+
+	opt := option.WithCredentialsJSON([]byte(config.FirebaseCredentialsJSON))
+	app, err := firebase.NewApp(context.Background(), nil, opt)
+	if err != nil {
+		fmt.Println("Could not initialize Firebase client : ", err.Error())
+	}
+
 	return Service{
 		redis:            redis,
 		Cfg:              config,
 		userRepository:   userRepo,
 		entityRepository: entityRepo,
 		tokenRepository:  tokenRepo,
-	}
-}
-
-func setTransaction(ctx *gin.Context, transactionsToCommit []*gorm.DB) error {
-	tx, exists := ctx.Get("tx")
-	if exists {
-		transactions, ok := tx.([]*gorm.DB)
-		if ok {
-			transactions = append(transactions, transactionsToCommit...)
-			ctx.Set("tx", transactions)
-			return nil
-		} else {
-			return errors.New("something went wrong")
-		}
-	} else {
-		ctx.Set("tx", transactionsToCommit)
-		return nil
+		firebaseApp:      app,
 	}
 }
