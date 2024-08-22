@@ -101,6 +101,9 @@ jobs:
 
           env_vars=$(jq -r 'to_entries | map("\(.key)=\(.value)") | join(",")' env_vars.json)
 
+          #remove no longer needed env_vars.json file
+          rm -f env_vars.json
+
       - name: Deploy to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v0
