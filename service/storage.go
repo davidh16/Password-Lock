@@ -21,12 +21,14 @@ func (s Service) UploadIconToBucket(ctx *gin.Context, path string, file *multipa
 	// Initialize Firebase Storage client
 	client, err := s.firebaseApp.Storage(context.Background())
 	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
 
 	// Create a storage reference
 	storageRef, err := client.Bucket(s.Cfg.StorageBucket)
 	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
 
