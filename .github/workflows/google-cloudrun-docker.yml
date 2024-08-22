@@ -94,7 +94,7 @@ jobs:
 
       - name: Printing out vars
         run: |-
-          echo ${{ vars) }}
+          echo ${{ vars }}
 
       - name: Deploy to Cloud Run
         id: deploy
