@@ -40,7 +40,7 @@ type Config struct {
 	DefaultEntityIconPath   string `env:"DEFAULT_ENTITY_ICON_PATH"`
 	GinMode                 string `env:"GIN_MODE"`
 	Environment             string `env:"ENVIRONMENT"`
-	FirebaseCredentialsJSON string `env:"FirebaseCredentialsJSON"`
+	FirebaseCredentialsJSON string `env:"FIREBASE_CREDENTIALS_JSON"`
 }
 
 func GetConfig() *Config {
