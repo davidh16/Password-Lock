@@ -92,6 +92,11 @@ jobs:
 
       # END - Docker auth and build
 
+      - name: Parse environment variables
+        uses: infovista-opensource/vars-to-env-action@2.0.0
+        with:
+          secrets: ${{ toJSON(vars) }}
+
       - name: Create .env file from environment variables
         run: |-
           # Create .env file
