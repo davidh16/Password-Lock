@@ -65,6 +65,8 @@ func (s Service) GetEntityIconSignedUrl(ctx *gin.Context, path string) (string, 
 		return "", err
 	}
 
+	fmt.Println(path)
+
 	signedUrl, err := storageRef.SignedURL(path, &storage.SignedURLOptions{
 		Expires: time.Now().AddDate(100, 0, 0),
 		Method:  "GET",
