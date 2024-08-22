@@ -92,14 +92,20 @@ jobs:
 
       # END - Docker auth and build
 
-      - name: Printing out vars
-        run: |-
-          echo ${{ vars }}
+      - name: Prepare Environment Variables for Deployment
+        id: prepare-env
+        run: |
+          # Convert environment variables to JSON and write to a file
+          echo '${{ toJSON(env) }}' > env_vars.json
+          cat env_vars.json
+
+          env_vars=$(jq -r 'to_entries | map("\(.key)=\(.value)") | join(",")' env_vars.json)
 
       - name: Deploy to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v0
         with:
+          env_vars: ${{ steps.prepare-env.outputs.env_vars }}
           service: ${{ env.SERVICE }}
           region: ${{ env.REGION }}
           image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.SERVICE }}:${{ github.sha }}
