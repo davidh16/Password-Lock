@@ -3,6 +3,7 @@ package service
 import (
 	"cloud.google.com/go/storage"
 	"context"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
 	"mime/multipart"
@@ -53,12 +54,14 @@ func (s Service) GetEntityIconSignedUrl(ctx *gin.Context, path string) (string, 
 	// Initialize Firebase Storage client
 	client, err := s.firebaseApp.Storage(context.Background())
 	if err != nil {
+		fmt.Println(err.Error())
 		return "", err
 	}
 
 	// Create a storage reference
 	storageRef, err := client.Bucket(s.Cfg.StorageBucket)
 	if err != nil {
+		fmt.Println(err.Error())
 		return "", err
 	}
 
@@ -68,6 +71,7 @@ func (s Service) GetEntityIconSignedUrl(ctx *gin.Context, path string) (string, 
 	},
 	)
 	if err != nil {
+		fmt.Println(err.Error())
 		return "", err
 	}
 
