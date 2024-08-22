@@ -92,11 +92,14 @@ jobs:
 
       # END - Docker auth and build
 
+      - name: Printing out vars
+        run: |-
+          echo ${{ toJSON(vars) }}
+
       - name: Deploy to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v0
         with:
-          env_vars: ${{ toJSON(vars) }}
           service: ${{ env.SERVICE }}
           region: ${{ env.REGION }}
           image: ${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.SERVICE }}:${{ github.sha }}
