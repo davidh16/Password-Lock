@@ -48,8 +48,6 @@ func (s Service) UpdateEntity(ctx *gin.Context, updatedEntity *models.Entity) er
 		entity.IconPath = s.GetEntityIconPath(updatedEntity.Type)
 	}
 
-	entity.Merge(updatedEntity)
-
 	decryptedPassword, err := s.decryptEntity(entity.Password)
 	if err != nil {
 		return err
@@ -63,6 +61,8 @@ func (s Service) UpdateEntity(ctx *gin.Context, updatedEntity *models.Entity) er
 
 		entity.Password = encryptedPassword
 	}
+
+	entity.Merge(updatedEntity)
 
 	result = s.entityRepository.Db().Where("uuid=?", updatedEntity.Uuid).Save(&entity)
 	if result.Error != nil {

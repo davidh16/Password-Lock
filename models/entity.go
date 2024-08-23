@@ -62,8 +62,4 @@ func (e *Entity) Merge(data *Entity) {
 		e.Type = data.Type
 	}
 
-	if !reflect.DeepEqual(e.IconPath, data.IconPath) {
-		e.IconPath = data.IconPath
-	}
-
 }
