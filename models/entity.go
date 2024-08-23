@@ -50,10 +50,6 @@ func (e *Entity) Merge(data *Entity) {
 		e.Username = data.Username
 	}
 
-	if !reflect.DeepEqual(e.IconPath, data.IconPath) {
-		e.IconPath = data.IconPath
-	}
-
 	if !reflect.DeepEqual(e.Description, data.Description) {
 		e.Description = data.Description
 	}

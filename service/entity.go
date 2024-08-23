@@ -46,6 +46,10 @@ func (s Service) UpdateEntity(ctx *gin.Context, updatedEntity *models.Entity) er
 
 	if updatedEntity.Type != entity.Type {
 		entity.IconPath = s.GetEntityIconPath(updatedEntity.Type)
+	} else {
+		if !reflect.DeepEqual(entity.IconPath, updatedEntity.IconPath) {
+			entity.IconPath = updatedEntity.IconPath
+		}
 	}
 
 	decryptedPassword, err := s.decryptEntity(entity.Password)
