@@ -44,11 +44,11 @@ func (s Service) UpdateEntity(ctx *gin.Context, updatedEntity *models.Entity) er
 		return result.Error
 	}
 
-	entity.Merge(updatedEntity)
-
 	if updatedEntity.Type != entity.Type {
 		entity.IconPath = s.GetEntityIconPath(updatedEntity.Type)
 	}
+
+	entity.Merge(updatedEntity)
 
 	decryptedPassword, err := s.decryptEntity(entity.Password)
 	if err != nil {

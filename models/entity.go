@@ -58,8 +58,12 @@ func (e *Entity) Merge(data *Entity) {
 		e.Description = data.Description
 	}
 
-	if data.Type > 0 && data.Type < 7 {
+	if !reflect.DeepEqual(e.Type, data.Type) {
 		e.Type = data.Type
+	}
+
+	if !reflect.DeepEqual(e.IconPath, data.IconPath) {
+		e.IconPath = data.IconPath
 	}
 
 }
