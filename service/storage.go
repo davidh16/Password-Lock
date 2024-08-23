@@ -21,14 +21,12 @@ func (s Service) UploadIconToBucket(ctx *gin.Context, path string, file *multipa
 	// Initialize Firebase Storage client
 	client, err := s.firebaseApp.Storage(context.Background())
 	if err != nil {
-		fmt.Println(err.Error())
 		return err
 	}
 
 	// Create a storage reference
 	storageRef, err := client.Bucket(s.Cfg.StorageBucket)
 	if err != nil {
-		fmt.Println(err.Error())
 		return err
 	}
 
@@ -53,16 +51,12 @@ func (s Service) UploadIconToBucket(ctx *gin.Context, path string, file *multipa
 
 func (s Service) GetEntityIconSignedUrl(ctx *gin.Context, path string) (string, error) {
 
-	fmt.Println("path : ", path)
-
 	// Initialize Firebase Storage client
 	client, err := s.firebaseApp.Storage(context.Background())
 	if err != nil {
 		fmt.Println(err.Error())
 		return "", err
 	}
-
-	fmt.Println("client initialized")
 
 	// Create a storage reference
 	storageRef, err := client.Bucket(s.Cfg.StorageBucket)
@@ -71,15 +65,12 @@ func (s Service) GetEntityIconSignedUrl(ctx *gin.Context, path string) (string, 
 		return "", err
 	}
 
-	fmt.Println("storageRef initialized")
-
 	signedUrl, err := storageRef.SignedURL(path, &storage.SignedURLOptions{
 		Expires: time.Now().AddDate(100, 0, 0),
 		Method:  "GET",
 	},
 	)
 	if err != nil {
-		fmt.Println(err.Error())
 		return "", err
 	}
 
