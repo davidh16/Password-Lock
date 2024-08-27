@@ -48,6 +48,7 @@ on:
   push:
     branches:
       - debug
+      - master
   pull_request:
     branches:
       - master
