@@ -15,6 +15,8 @@ func main() {
 
 	cfg := config.GetConfig()
 
+	fmt.Println("environment : ", cfg.Environment)
+
 	redis := db.ConnectToRedis(cfg)
 
 	pgInstance := db.ConnectToDatabase(cfg)
