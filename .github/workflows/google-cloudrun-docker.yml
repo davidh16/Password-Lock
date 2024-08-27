@@ -115,15 +115,17 @@ jobs:
           echo '${{ toJSON(vars) }}' > env_vars.json
           cat env_vars.json
 
-          env_vars=$(jq -r 'to_entries | map("\(.key)=\(.value)") | join(",")' env_vars.json)
-
-          echo ${{ env_vars }}
+          #env_vars=$(jq -r 'to_entries | map("\(.key)=\(.value)") | join(",")' env_vars.json)
 
           #remove no longer needed env_vars.json file
-          rm -f env_vars.json
+          #rm -f env_vars.json
+
+      - name: print json
+        id: json
+        run: env_vars=$(jq -r 'to_entries | map("\(.key)=\(.value)") | join(",")' env_vars.json)
 
       - name: print out env
-        run: echo ${{ steps.prepare-env.outputs.env_vars }}
+        run: echo ${{ steps.json.outputs.env_vars }}
 
       - name: Deploy to Cloud Run
         id: deploy
