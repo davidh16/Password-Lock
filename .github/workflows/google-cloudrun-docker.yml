@@ -88,6 +88,9 @@ jobs:
          username: _json_key
          password: ${{ secrets.GCR_SERVICE_ACCOUNT_JSON }}
 
+      - name: Print env for debuging
+        run: printenv
+
       
       # Build and push the Docker image, passing the .env_file
       - name: Build and Push Container
