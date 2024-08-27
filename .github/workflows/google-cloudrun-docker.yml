@@ -58,7 +58,8 @@ env:
 
 jobs:
   deploy:
-    environment: ${{ github.ref == 'refs/heads/master' && 'production' || 'debug' }}
+    environment: 
+      name: ${{ github.ref == 'refs/heads/master' && 'production' || 'debug' }}
     
     permissions:
       contents: 'read'
