@@ -117,14 +117,13 @@ jobs:
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}
 
-      - uses: dorny/paths-filter@v3
-        id: changes-to-migrations
+      - name: Get changed files in the docs folder
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v34
         with:
-          filters: |
-            migrations:
-              - 'migrations/**'      
+          files: migrations/**
 
       - name: Execute Cloud Run Migration Job
-        if: steps.changes-to-migrations.migrations.src == 'true'
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: |
           gcloud run jobs execute migrate --region=${{ env.REGION }}
