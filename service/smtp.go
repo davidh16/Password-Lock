@@ -34,7 +34,7 @@ func (s Service) SendVerificationLinkEmail(emailAddress string, token string) er
 	body, err := ParseTemplate("verification_link_email.html", struct {
 		BaseUrl string
 		Token   string
-	}{Token: token, BaseUrl: s.Cfg.BaseUrl})
+	}{Token: token, BaseUrl: s.Cfg.FrontendBaseUrl})
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func (s Service) SendPasswordResetLinkEmail(emailAddress string, token string) e
 	body, err := ParseTemplate("password_reset_link_email.html", struct {
 		BaseUrl string
 		Token   string
-	}{BaseUrl: s.Cfg.BaseUrl, Token: token})
+	}{BaseUrl: s.Cfg.FrontendBaseUrl, Token: token})
 	if err != nil {
 		return err
 	}

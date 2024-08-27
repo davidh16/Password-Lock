@@ -1,10 +1,10 @@
 package config
 
 import (
+	"encoding/base64"
 	"fmt"
 	"github.com/joho/godotenv"
 	"github.com/tkanos/gonfig"
-	"golang.org/x/oauth2/google"
 )
 
 const (
@@ -15,30 +15,32 @@ const (
 
 // Config struct can be expanded if more env variables are introduced
 type Config struct {
-	PgUrl                           string `env:"PG_URL"`
-	DbHost                          string `env:"DB_HOST"`
-	DbUser                          string `env:"DB_USER"`
-	DbPassword                      string `env:"DB_PASSWORD"`
-	DbName                          string `env:"DB_NAME"`
-	RedisHost                       string `env:"REDIS_HOST"`
-	RedisPort                       string `env:"REDIS_PORT"`
-	RedisPassword                   string `env:"REDIS_PASSWORD"`
-	Port                            string `env:"PORT"`
-	UserSecretKey                   string `env:"USER_SECRET_KEY"`
-	EntitySecretKey                 string `env:"ENTITY_SECRET_KEY"`
-	EntitySecretVector              string `env:"ENTITY_SECRET_VECTOR"`
-	ResponseSecretKey               string `env:"RESPONSE_SECRET_KEY"`
-	ResponseSecretVector            string `env:"RESPONSE_SECRET_VECTOR"`
-	StorageBucket                   string `env:"STORAGE_BUCKET"`
-	SmtpPort                        string `env:"SMTP_PORT"`
-	SmtpHost                        string `env:"SMTP_HOST"`
-	SmtpFrom                        string `env:"SMTP_FROM"`
-	SmtpPassword                    string `env:"SMTP_PASSWORD"`
-	BaseUrl                         string `env:"BASE_URL"`
-	DefaultEntityIconPath           string `env:"DEFAULT_ENTITY_ICON_PATH"`
-	GinMode                         string `env:"GIN_MODE"`
-	Environment                     string `env:"ENVIRONMENT"`
-	GoogleServiceAccountCredentials *google.Credentials
+	PgUrl                   string `env:"PG_URL"`
+	DbHost                  string `env:"DB_HOST"`
+	DbUser                  string `env:"DB_USER"`
+	DbPassword              string `env:"DB_PASSWORD"`
+	DbName                  string `env:"DB_NAME"`
+	RedisHost               string `env:"REDIS_HOST"`
+	RedisPort               string `env:"REDIS_PORT"`
+	RedisPassword           string `env:"REDIS_PASSWORD"`
+	Port                    string `env:"PORT"`
+	UserSecretKey           string `env:"USER_SECRET_KEY"`
+	EntitySecretKey         string `env:"ENTITY_SECRET_KEY"`
+	EntitySecretVector      string `env:"ENTITY_SECRET_VECTOR"`
+	ResponseSecretKey       string `env:"RESPONSE_SECRET_KEY"`
+	ResponseSecretVector    string `env:"RESPONSE_SECRET_VECTOR"`
+	StorageBucket           string `env:"STORAGE_BUCKET"`
+	SmtpPort                string `env:"SMTP_PORT"`
+	SmtpHost                string `env:"SMTP_HOST"`
+	SmtpFrom                string `env:"SMTP_FROM"`
+	SmtpPassword            string `env:"SMTP_PASSWORD"`
+	LocalFrontendBaseUrl    string `env:"LOCAL_FRONTEND_BASE_URL"`
+	DebugFrontendBaseUrl    string `env:"DEBUG_FRONTEND_BASE_URL"`
+	FrontendBaseUrl         string
+	DefaultEntityIconPath   string `env:"DEFAULT_ENTITY_ICON_PATH"`
+	GinMode                 string `env:"GIN_MODE"`
+	Environment             string `env:"ENVIRONMENT"`
+	FirebaseCredentialsJSON string `env:"FIREBASE_CREDENTIALS_JSON"`
 }
 
 func GetConfig() *Config {
@@ -55,6 +57,22 @@ func GetConfig() *Config {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+
+	switch configuration.Environment {
+	case "local":
+		configuration.FrontendBaseUrl = configuration.LocalFrontendBaseUrl
+	case "debug":
+		configuration.FrontendBaseUrl = configuration.DebugFrontendBaseUrl
+	default:
+		configuration.FrontendBaseUrl = configuration.LocalFrontendBaseUrl
+	}
+
+	firebaseCredentialsJSON, err := base64.StdEncoding.DecodeString(configuration.FirebaseCredentialsJSON)
+	if err != nil {
+		fmt.Println("Firebase credentials not loaded : ", err.Error())
+	}
+
+	configuration.FirebaseCredentialsJSON = string(firebaseCredentialsJSON)
 
 	return configuration
 }

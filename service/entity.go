@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"password-lock/models"
 	"reflect"
 	"strings"
@@ -45,10 +44,12 @@ func (s Service) UpdateEntity(ctx *gin.Context, updatedEntity *models.Entity) er
 		return result.Error
 	}
 
-	entity.Merge(updatedEntity)
-
 	if updatedEntity.Type != entity.Type {
 		entity.IconPath = s.GetEntityIconPath(updatedEntity.Type)
+	} else {
+		if !reflect.DeepEqual(entity.IconPath, updatedEntity.IconPath) {
+			entity.IconPath = updatedEntity.IconPath
+		}
 	}
 
 	decryptedPassword, err := s.decryptEntity(entity.Password)
@@ -65,6 +66,8 @@ func (s Service) UpdateEntity(ctx *gin.Context, updatedEntity *models.Entity) er
 		entity.Password = encryptedPassword
 	}
 
+	entity.Merge(updatedEntity)
+
 	result = s.entityRepository.Db().Where("uuid=?", updatedEntity.Uuid).Save(&entity)
 	if result.Error != nil {
 		return result.Error
@@ -74,13 +77,7 @@ func (s Service) UpdateEntity(ctx *gin.Context, updatedEntity *models.Entity) er
 }
 
 func (s Service) DeleteEntity(ctx *gin.Context, entityUuid string) error {
-	tx := s.entityRepository.Db().Begin()
-	err := setTransaction(ctx, []*gorm.DB{tx})
-	if err != nil {
-		return err
-	}
-
-	result := tx.Where("uuid=?", entityUuid).Delete(models.Entity{})
+	result := s.entityRepository.Db().Where("uuid=?", entityUuid).Delete(models.Entity{})
 	if result.Error != nil {
 		return result.Error
 	}

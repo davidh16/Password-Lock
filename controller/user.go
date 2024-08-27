@@ -203,6 +203,7 @@ func (c Controller) ResendVerificationEmail(ctx *gin.Context) {
 }
 
 func (c Controller) CompleteRegistration(ctx *gin.Context) {
+
 	me, err := c.service.Me(ctx)
 	if err != nil {
 		c.SendResponse(ctx, Response{
@@ -301,6 +302,7 @@ func (c Controller) Login(ctx *gin.Context) {
 		return
 	}
 
+	ctx.SetSameSite(http.SameSiteNoneMode)
 	ctx.SetCookie("session", sessionKey, sessionLifeTime, "/", "", true, false)
 
 	c.SendResponse(ctx, Response{

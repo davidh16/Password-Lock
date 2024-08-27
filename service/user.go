@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"password-lock/db"
 	"password-lock/models"
@@ -51,18 +50,12 @@ func (s Service) VerifyUser(ctx *gin.Context, userUuid string, password string) 
 
 func (s Service) CompleteRegistration(ctx *gin.Context, user *models.User, personalQuestions []*models.UserPersonalQuestion) (*models.User, error) {
 
-	tx := s.userRepository.Db().Begin()
-	err := setTransaction(ctx, []*gorm.DB{tx})
-	if err != nil {
-		return nil, err
-	}
-
-	result := tx.Table(db.USERS_TABLE).Where("uuid=? AND active = TRUE AND completed = FALSE", user.Uuid).Save(user)
+	result := s.userRepository.Db().Where("uuid=? AND active = TRUE AND completed = FALSE", user.Uuid).Save(user)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 
-	result = tx.Table("user_personal_questions").Create(personalQuestions)
+	result = s.userRepository.Db().Table(db.USER_PERSONAL_QUESTIONS_TABLE).Create(personalQuestions)
 	if result.Error != nil {
 		return nil, result.Error
 	}

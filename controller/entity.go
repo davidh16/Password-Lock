@@ -32,12 +32,6 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 		return
 	}
 
-	if entity.Type < 6 && entity.Type > 0 {
-		entity.IconPath = c.service.GetEntityIconPath(entity.Type)
-	} else {
-		entity.IconPath = c.service.Cfg.DefaultEntityIconPath
-	}
-
 	me := ctx.Value("me").(string)
 
 	entity.UserUuid = me
@@ -55,38 +49,10 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 		return
 	}
 
-	if entity.Type == 6 {
-		var path string
-		file, err := ctx.FormFile("file")
-		if err != nil || file == nil {
-
-			createdEntity.Password = entity.Password
-
-			data := map[string]interface{}{
-				"entity": createdEntity,
-			}
-
-			response, err := json.Marshal(data)
-			if err != nil {
-				c.SendResponse(ctx, Response{
-					Status: http.StatusInternalServerError,
-					Error:  err.Error(),
-				})
-			}
-
-			encryptedResponse, err := c.encryptResponse(string(response))
-			if err != nil {
-				c.SendResponse(ctx, Response{
-					Status: http.StatusInternalServerError,
-					Error:  err.Error(),
-				})
-			}
-
-			ctx.JSON(http.StatusCreated, encryptedResponse)
-			return
-		} else {
-			path = strings.Join([]string{me, createdEntity.Uuid, file.Filename}, "/")
-		}
+	var path string
+	file, _ := ctx.FormFile("file")
+	if file != nil {
+		path = strings.Join([]string{me, createdEntity.Uuid, file.Filename}, "/")
 
 		err = c.service.UploadIconToBucket(ctx, path, file)
 		if err != nil {
@@ -107,9 +73,8 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 			})
 			return
 		}
-	}
 
-	createdEntity.Password = entity.Password
+	}
 
 	data := map[string]interface{}{
 		"entity": createdEntity,
@@ -150,10 +115,9 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 
 	file, _ := ctx.FormFile("file")
 	if file != nil {
-		var path string
 
 		me := ctx.Value("me").(string)
-		path = strings.Join([]string{me, updatedEntity.Uuid, file.Filename}, "/")
+		path := strings.Join([]string{me, updatedEntity.Uuid, file.Filename}, "/")
 
 		if file != nil {
 			err = c.service.UploadIconToBucket(ctx, path, file)
@@ -167,10 +131,6 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 		}
 
 		updatedEntity.IconPath = path
-	} else {
-		if updatedEntity.Type != 6 {
-			updatedEntity.IconPath = c.service.GetEntityIconPath(updatedEntity.Type)
-		}
 	}
 
 	err = c.service.UpdateEntity(ctx, updatedEntity)
