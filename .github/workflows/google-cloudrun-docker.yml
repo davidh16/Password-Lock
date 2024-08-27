@@ -48,6 +48,8 @@ on:
   push:
     branches:
       - debug
+  pull_request:
+    branches:
       - master
 
 env:
