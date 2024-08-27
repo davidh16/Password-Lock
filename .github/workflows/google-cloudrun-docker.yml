@@ -48,7 +48,7 @@ on:
   push:
     branches:
       - debug
-      - main
+      - master
 
 env:
   PROJECT_ID: ${{ secrets.PROJECT_ID }} # TODO: update Google Cloud project id
@@ -58,7 +58,7 @@ env:
 
 jobs:
   deploy:
-    environment: ${{ github.ref == 'refs/heads/main' && 'production' || 'debug' }}
+    environment: ${{ github.ref == 'refs/heads/master' && 'production' || 'debug' }}
     
     permissions:
       contents: 'read'
