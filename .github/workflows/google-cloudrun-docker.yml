@@ -53,17 +53,17 @@ on:
     branches:
       - master
 
-env:
-  PROJECT_ID: ${{ secrets.PROJECT_ID }}
-  GAR_LOCATION: ${{ secrets.GAR_LOCATION }}
-  SERVICE: ${{ secrets.SERVICE }}
-  REGION: ${{ secrets.REGION }}
-
 jobs:
   deploy:
     environment: 
       name: ${{ github.ref == 'refs/heads/master' && 'production' || 'debug' }}
-    
+      
+    env:
+      PROJECT_ID: ${{ secrets.PROJECT_ID }}
+      GAR_LOCATION: ${{ secrets.GAR_LOCATION }}
+      SERVICE: ${{ secrets.SERVICE }}
+      REGION: ${{ secrets.REGION }}
+  
     permissions:
       contents: 'read'
       id-token: 'write'
