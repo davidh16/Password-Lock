@@ -117,6 +117,14 @@ jobs:
       - name: Show Output
         run: echo ${{ steps.deploy.outputs.url }}
 
+      - uses: dorny/paths-filter@v3
+        id: changes-to-migrations
+        with:
+          filters: |
+            migrations:
+              - 'migrations/**'      
+
       - name: Execute Cloud Run Migration Job
+        if: steps.changes-to-migrations.migrations.src == 'true'
         run: |
           gcloud run jobs execute migrate --region=${{ env.REGION }}
