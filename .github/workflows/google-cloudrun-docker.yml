@@ -115,14 +115,14 @@ jobs:
           echo '${{ toJSON(vars) }}' > env_vars.json
           cat env_vars.json
 
-          #env_vars=$(jq -r 'to_entries | map("\(.key)=\(.value)") | join(",")' env_vars.json)
+          env_vars=$(jq -r 'to_entries | map("\(.key)=\(.value)") | join(",")' env_vars.json)
+
+          echo "env_vars=$env_vars"
+          # Set the output variable for the step
+          echo "::set-output name=env_vars::$env_vars"
 
           #remove no longer needed env_vars.json file
           #rm -f env_vars.json
-
-      - name: print json
-        id: json
-        run: env_vars=$(jq -r 'to_entries | map("\(.key)=\(.value)") | join(",")' env_vars.json)
 
       - name: print out env
         run: echo ${{ steps.json.outputs.env_vars }}
