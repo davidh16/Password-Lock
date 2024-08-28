@@ -126,7 +126,7 @@ jobs:
         run: echo ${{ steps.deploy.outputs.url }}
 
       - name: Get changed files in the docs folder
-      - uses: dorny/paths-filter@v3
+        uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
