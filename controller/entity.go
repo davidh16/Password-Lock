@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"password-lock/models"
@@ -105,6 +106,9 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 	var me string
 	ctxValue := ctx.Value("me")
 	if ctxValue != nil {
+
+		fmt.Println("me : ", me)
+
 		me = ctxValue.(string)
 	} else {
 		c.SendResponse(ctx, Response{
