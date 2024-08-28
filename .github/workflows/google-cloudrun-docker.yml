@@ -131,7 +131,7 @@ jobs:
         with:
           filters: |
             migrations:
-              - '.github/migrations/**'
+              - 'migrations/**'
 
       - name: Debug - List Changed Files
         run: echo "${{ steps.filter.outputs.migrations }}"
