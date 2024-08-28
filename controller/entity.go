@@ -113,19 +113,19 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 		return
 	}
 
+	var me string
+	ctxValue := ctx.Value("me")
+	if ctxValue != nil {
+		me = ctxValue.(string)
+	} else {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+		})
+		return
+	}
+
 	file, _ := ctx.FormFile("file")
 	if file != nil {
-		var me string
-		ctxValue := ctx.Value("me")
-		if ctxValue != nil {
-			me = ctxValue.(string)
-		} else {
-			c.SendResponse(ctx, Response{
-				Status: http.StatusInternalServerError,
-				Error:  err.Error(),
-			})
-			return
-		}
 
 		path := strings.Join([]string{me, updatedEntity.Uuid, file.Filename}, "/")
 
@@ -178,7 +178,16 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 
 func (c Controller) DeleteEntity(ctx *gin.Context) {
 
-	me := ctx.Value("me").(string)
+	var me string
+	ctxValue := ctx.Value("me")
+	if ctxValue != nil {
+		me = ctxValue.(string)
+	} else {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+		})
+		return
+	}
 
 	entityUuid := ctx.Param("entity_uuid")
 
