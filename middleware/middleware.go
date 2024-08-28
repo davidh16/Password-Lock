@@ -114,6 +114,8 @@ func (m *Middleware) User() gin.HandlerFunc {
 			ctx.AbortWithStatus(http.StatusNotAcceptable)
 			return
 		}
+
+		ctx.Next()
 	}
 }
 

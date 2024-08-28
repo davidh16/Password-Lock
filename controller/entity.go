@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"password-lock/models"
@@ -101,6 +102,18 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 }
 
 func (c Controller) UpdateEntity(ctx *gin.Context) {
+
+	var me string
+	ctxValue, ok := ctx.Get("me")
+	if ok {
+		me = fmt.Sprintf("%s", ctxValue)
+	} else {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+		})
+		return
+	}
+
 	var updatedEntity *models.Entity
 
 	// decoding json message to user model
@@ -113,10 +126,17 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 		return
 	}
 
+	if updatedEntity.UserUuid != me {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusForbidden,
+			Error:  err.Error(),
+		})
+		return
+	}
+
 	file, _ := ctx.FormFile("file")
 	if file != nil {
 
-		me := ctx.Value("me").(string)
 		path := strings.Join([]string{me, updatedEntity.Uuid, file.Filename}, "/")
 
 		if file != nil {
@@ -168,7 +188,16 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 
 func (c Controller) DeleteEntity(ctx *gin.Context) {
 
-	me := ctx.Value("me").(string)
+	var me string
+	ctxValue := ctx.Value("me")
+	if ctxValue != nil {
+		me = ctxValue.(string)
+	} else {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+		})
+		return
+	}
 
 	entityUuid := ctx.Param("entity_uuid")
 
