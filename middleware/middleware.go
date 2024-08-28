@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 	"gorm.io/gorm"
@@ -36,15 +35,11 @@ func (m *Middleware) Auth() gin.HandlerFunc {
 			return
 		}
 
-		fmt.Println("session : ", sessionUuid)
-
 		loggedInUser, err := m.redis.Get(context.Background(), sessionUuid).Result()
 		if err != nil {
 			ctx.AbortWithError(http.StatusProxyAuthRequired, errors.New("session expired"))
 			return
 		}
-
-		fmt.Println("loggedInUser : ", loggedInUser)
 
 		if loggedInUser == "" {
 			ctx.AbortWithError(http.StatusProxyAuthRequired, errors.New("session expired"))
@@ -104,7 +99,6 @@ func (m *Middleware) User() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var user models.User
 		me, ok := ctx.Get("me")
-		fmt.Println("me : ", me)
 		if ok {
 			result := m.db.Table(db.USERS_TABLE).Where("uuid=?", me).First(&user)
 			if result.Error != nil {
