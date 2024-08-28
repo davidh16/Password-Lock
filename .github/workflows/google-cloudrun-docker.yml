@@ -119,6 +119,8 @@ jobs:
 
           env_vars=$(jq -r 'to_entries | map("\(.key)=\(.value)") | join(",")' env_vars.json)
 
+          echo "::set-output name=env_vars::$env_vars"
+
           #remove no longer needed env_vars.json file
           rm -f env_vars.json
 
