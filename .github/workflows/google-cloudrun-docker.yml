@@ -46,17 +46,23 @@ name: Build and Deploy to Cloud Run
 
 on:
   push:
-    branches: [ "debug" ]
+    branches:
+      - debug
+      - master
+  pull_request:
+    branches:
+      - master
 
 env:
-  PROJECT_ID: ${{ secrets.PROJECT_ID }} # TODO: update Google Cloud project id
-  GAR_LOCATION: ${{ secrets.GAR_LOCATION }} # TODO: update Artifact Registry location
-  SERVICE: ${{ secrets.SERVICE }} # TODO: update Cloud Run service name
-  REGION: ${{ secrets.REGION }} # TODO: update Cloud Run service region
+  PROJECT_ID: ${{ secrets.PROJECT_ID }}
+  GAR_LOCATION: ${{ secrets.GAR_LOCATION }}
+  SERVICE: ${{ secrets.SERVICE }}
+  REGION: ${{ secrets.REGION }}
 
 jobs:
   deploy:
-    environment: debug
+    environment: 
+      name: ${{ github.ref == 'refs/heads/master' && 'production' || 'debug' }}
     
     permissions:
       contents: 'read'
@@ -89,6 +95,17 @@ jobs:
           docker build \
             -t "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.SERVICE }}:${{ github.sha }}" ./
           docker push "${{ env.GAR_LOCATION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.SERVICE }}/${{ env.SERVICE }}:${{ github.sha }}"
+
+      - name: Get changed files in the docs folder
+        id: changed-files-specific
+        uses: tj-actions/changed-files@v34
+        with:
+          files: migrations/**
+
+      - name: Execute Cloud Run Migration Job
+        if: steps.changed-files-specific.outputs.any_changed == 'true'
+        run: |
+          gcloud run jobs execute migrate --region=${{ env.REGION }}
 
       # END - Docker auth and build
 
