@@ -98,7 +98,7 @@ func (s Service) sendEmail(to string, subject string, body string) error {
 	from := fmt.Sprintf("From: %s\n", "Password Lock")
 	msg := []byte(from + subject + mime + "\n" + body)
 
-	auth := smtp.PlainAuth("", s.Cfg.SmtpFrom, s.Cfg.SmtpPassword, s.Cfg.SmtpHost)
+	auth := smtp.PlainAuth("", s.Cfg.SmtpFrom, s.Cfg.SmtpUsername, s.Cfg.SmtpHost)
 
 	// Sending email.
 	err := smtp.SendMail(s.Cfg.SmtpHost+":"+s.Cfg.SmtpPort, auth, s.Cfg.SmtpFrom, receivers, msg)

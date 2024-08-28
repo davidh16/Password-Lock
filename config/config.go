@@ -32,8 +32,9 @@ type Config struct {
 	StorageBucket           string `env:"STORAGE_BUCKET"`
 	SmtpPort                string `env:"SMTP_PORT"`
 	SmtpHost                string `env:"SMTP_HOST"`
-	SmtpFrom                string `env:"SMTP_FROM"`
 	SmtpPassword            string `env:"SMTP_PASSWORD"`
+	SmtpUsername            string `env:"SMTP_USERNAME"`
+	SmtpFrom                string `env:"SMTP_FROM"`
 	LocalFrontendBaseUrl    string `env:"LOCAL_FRONTEND_BASE_URL"`
 	DebugFrontendBaseUrl    string `env:"DEBUG_FRONTEND_BASE_URL"`
 	FrontendBaseUrl         string
