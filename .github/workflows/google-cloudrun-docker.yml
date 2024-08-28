@@ -124,9 +124,6 @@ jobs:
           #remove no longer needed env_vars.json file
           rm -f env_vars.json
 
-      - name: print
-        run: echo ${{ steps.prepare-env.outputs.env_vars }}
-
       - name: Deploy to Cloud Run
         id: deploy
         uses: google-github-actions/deploy-cloudrun@v0
