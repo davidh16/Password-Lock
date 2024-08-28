@@ -3,7 +3,6 @@ package service
 import (
 	"cloud.google.com/go/storage"
 	"context"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"io"
 	"mime/multipart"
@@ -68,7 +67,6 @@ func (s Service) GetEntityIconSignedUrl(ctx *gin.Context, path string) (string, 
 		Method:  "GET",
 	})
 	if err != nil {
-		fmt.Println(err.Error())
 		return "", err
 	}
 
