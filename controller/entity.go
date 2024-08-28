@@ -115,8 +115,18 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 
 	file, _ := ctx.FormFile("file")
 	if file != nil {
+		var me string
+		ctxValue := ctx.Value("me")
+		if ctxValue != nil {
+			me = ctxValue.(string)
+		} else {
+			c.SendResponse(ctx, Response{
+				Status: http.StatusInternalServerError,
+				Error:  err.Error(),
+			})
+			return
+		}
 
-		me := ctx.Value("me").(string)
 		path := strings.Join([]string{me, updatedEntity.Uuid, file.Filename}, "/")
 
 		if file != nil {
