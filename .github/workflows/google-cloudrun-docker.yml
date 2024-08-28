@@ -126,13 +126,15 @@ jobs:
         run: echo ${{ steps.deploy.outputs.url }}
 
       - name: Get changed files in the docs folder
-        id: changed-files-specific
-        uses: tj-actions/changed-files@v34
+      - uses: dorny/paths-filter@v3
+        id: filter
         with:
-          files: migrations/**
+          filters: |
+            migrations:
+              - '.github/migrations/**'
 
       - name: Debug - List Changed Files
-        run: echo "${{ steps.changed-files-specific.outputs.any_changed }}"
+        run: echo "${{ steps.filter.outputs.migrations }}"
 
       - name: Execute Cloud Run Migration Job
         if: steps.changed-files-specific.outputs.any_changed == 'true'
