@@ -104,10 +104,10 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 func (c Controller) UpdateEntity(ctx *gin.Context) {
 
 	var me string
-	ctxValue := ctx.Value("me")
-	if ctxValue != nil {
+	ctxValue, ok := ctx.Get("me")
+	if ok {
 
-		fmt.Println("me : ", me)
+		fmt.Println("me : ", ctxValue)
 
 		me = ctxValue.(string)
 	} else {
