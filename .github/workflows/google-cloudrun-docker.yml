@@ -129,9 +129,10 @@ jobs:
         uses: dorny/paths-filter@v3
         id: filter
         with:
+          fetch-depth: 0
           filters: |
             migrations:
-              - '.github/migrations/**'
+              - 'migrations/**'
 
       - name: Debug - List Changed Files
         run: echo "${{ steps.filter.outputs.migrations }}"
