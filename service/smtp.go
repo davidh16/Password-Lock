@@ -87,18 +87,21 @@ func (s Service) SendNewPasswordEmail(emailAddress string, newPassword string) e
 	return nil
 }
 
-func (s Service) sendEmail(to string, subject string, body string) error {
+func (s Service) sendEmail(receiver string, subject string, body string) error {
 
 	receivers := []string{
-		to,
+		receiver,
 	}
 
 	mime := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 	subject = "Subject: " + subject + "\n"
 	from := fmt.Sprintf("From: %s\n", "Password Lock")
-	msg := []byte(from + subject + mime + "\n" + body)
+	to := fmt.Sprintf("To: %s\n", receiver)
+	msg := []byte(to + from + subject + mime + "\n" + body)
 
 	auth := smtp.PlainAuth("", s.Cfg.SmtpUsername, s.Cfg.SmtpPassword, s.Cfg.SmtpHost)
+
+	fmt.Println(auth)
 
 	// Sending email.
 	err := smtp.SendMail(s.Cfg.SmtpHost+":"+s.Cfg.SmtpPort, auth, s.Cfg.SmtpFrom, receivers, msg)
