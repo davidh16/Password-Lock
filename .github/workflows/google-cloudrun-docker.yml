@@ -142,7 +142,6 @@ jobs:
         run: echo "${{ steps.filter.outputs.migrations }}"
 
       - name: Execute Cloud Run Migration Job
-        if: steps.filter.outputs.migrations == 'true'
         run: |
           gcloud run jobs execute migrate \
           --project ${{ env.PROJECT_ID }} \
