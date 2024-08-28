@@ -103,7 +103,7 @@ jobs:
           files: migrations/**
 
       - name: Debug - List Changed Files
-        run: echo "${{ steps.changed-files-specific.outputs.all_changed_files }}"
+        run: echo "${{ steps.changed-files-specific.outputs.any_changed }}"
 
       - name: Execute Cloud Run Migration Job
         if: steps.changed-files-specific.outputs.any_changed == 'true'
