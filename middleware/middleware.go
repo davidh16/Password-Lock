@@ -104,6 +104,7 @@ func (m *Middleware) User() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var user models.User
 		me, ok := ctx.Get("me")
+		fmt.Println("me : ", me)
 		if ok {
 			result := m.db.Table(db.USERS_TABLE).Where("uuid=?", me).First(&user)
 			if result.Error != nil {
