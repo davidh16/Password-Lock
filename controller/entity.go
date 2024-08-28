@@ -106,10 +106,7 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 	var me string
 	ctxValue, ok := ctx.Get("me")
 	if ok {
-
-		fmt.Println("me : ", ctxValue)
-
-		me = ctxValue.(string)
+		me = fmt.Sprintf("%s", ctxValue)
 	} else {
 		c.SendResponse(ctx, Response{
 			Status: http.StatusInternalServerError,
