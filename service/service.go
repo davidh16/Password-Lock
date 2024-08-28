@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"encoding/base64"
 	firebase "firebase.google.com/go"
 	"fmt"
 	"github.com/redis/go-redis/v9"
@@ -26,7 +27,11 @@ func NewService(redis *redis.Client,
 	tokenRepo repository.TokenRepository,
 ) Service {
 
-	opt := option.WithCredentialsJSON([]byte(config.FirebaseCredentialsJSON))
+	creds, err := base64.StdEncoding.DecodeString(config.FirebaseCredentialsJSON)
+	if err != nil {
+		fmt.Println("Could not initialize Firebase client : ", err.Error())
+	}
+	opt := option.WithCredentialsJSON(creds)
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		fmt.Println("Could not initialize Firebase client : ", err.Error())
