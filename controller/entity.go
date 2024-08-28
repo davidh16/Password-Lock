@@ -134,6 +134,8 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 		return
 	}
 
+	fmt.Println("evo me")
+
 	file, _ := ctx.FormFile("file")
 	if file != nil {
 
@@ -142,6 +144,7 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 		if file != nil {
 			err = c.service.UploadIconToBucket(ctx, path, file)
 			if err != nil {
+				fmt.Println(err.Error())
 				c.SendResponse(ctx, Response{
 					Status: http.StatusInternalServerError,
 					Error:  err.Error(),
