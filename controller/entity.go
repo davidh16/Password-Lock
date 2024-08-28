@@ -101,6 +101,18 @@ func (c Controller) CreateEntity(ctx *gin.Context) {
 }
 
 func (c Controller) UpdateEntity(ctx *gin.Context) {
+
+	var me string
+	ctxValue := ctx.Value("me")
+	if ctxValue != nil {
+		me = ctxValue.(string)
+	} else {
+		c.SendResponse(ctx, Response{
+			Status: http.StatusInternalServerError,
+		})
+		return
+	}
+
 	var updatedEntity *models.Entity
 
 	// decoding json message to user model
@@ -113,13 +125,10 @@ func (c Controller) UpdateEntity(ctx *gin.Context) {
 		return
 	}
 
-	var me string
-	ctxValue := ctx.Value("me")
-	if ctxValue != nil {
-		me = ctxValue.(string)
-	} else {
+	if updatedEntity.UserUuid != me {
 		c.SendResponse(ctx, Response{
-			Status: http.StatusInternalServerError,
+			Status: http.StatusForbidden,
+			Error:  err.Error(),
 		})
 		return
 	}
