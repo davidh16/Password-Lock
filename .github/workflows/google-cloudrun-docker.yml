@@ -104,7 +104,8 @@ jobs:
       - name: Execute Cloud Run Migration Job
         if: steps.changed-files-specific.outputs.any_changed == 'true'
         run: |
-          gcloud run jobs execute migrate --region=${{ env.REGION }}
+          gcloud run jobs execute migrate \
+          --project ${{ env.PROJECT_ID }} \
 
       # END - Docker auth and build
 
