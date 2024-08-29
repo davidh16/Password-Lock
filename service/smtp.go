@@ -101,8 +101,6 @@ func (s Service) sendEmail(receiver string, subject string, body string) error {
 
 	auth := smtp.PlainAuth("", s.Cfg.SmtpUsername, s.Cfg.SmtpPassword, s.Cfg.SmtpHost)
 
-	fmt.Println(auth)
-
 	// Sending email.
 	err := smtp.SendMail(s.Cfg.SmtpHost+":"+s.Cfg.SmtpPort, auth, s.Cfg.SmtpFrom, receivers, msg)
 	if err != nil {
