@@ -61,11 +61,7 @@ func (c Controller) RegisterUser(ctx *gin.Context) {
 
 	err = c.sendVerificationEmail(ctx, user)
 	if err != nil {
-		c.SendResponse(ctx, Response{
-			Status: http.StatusInternalServerError,
-			Error:  err.Error(),
-		})
-		return
+		log.Println("failed to send an email : ", err.Error())
 	}
 
 	c.SendResponse(ctx, Response{
@@ -596,8 +592,7 @@ func (c Controller) sendVerificationEmail(ctx *gin.Context, user *models.User) e
 
 	err = c.service.SendVerificationLinkEmail(user.EmailAddress, verificationToken.Token)
 	if err != nil {
-		log.Println("failed to send an email")
-		return nil
+		return err
 	}
 
 	return nil
