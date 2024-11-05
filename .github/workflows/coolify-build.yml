@@ -49,4 +49,4 @@ jobs:
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
       - name: Deploy to Coolify
         run: |
-          curl --request GET 'http://157.90.232.136:8000/api/v1/deploy?uuid=dockkokgwg80kgccoc4kooc0&force=false' --header 'Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}'
+          curl --request GET '${{ secrets.COOLIFY_WEBHOOK }}' --header 'Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}'
