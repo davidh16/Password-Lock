@@ -14,7 +14,9 @@ env:
   IMAGE_NAME: "davidh16/github-actions-with-coolify"
 
 jobs:
-  amd64:
+  deploy:
+    environment: 
+      name: ${{ github.ref == 'refs/heads/master' && 'production' || 'debug' }}
     runs-on: ubuntu-latest
     permissions:
       contents: read
