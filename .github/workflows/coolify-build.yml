@@ -29,6 +29,16 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.REGISTRY_TOKEN  }}
+      - name: Create .env file from vars
+        run: |
+          echo "Generating .env file from vars..."
+          touch .env
+          for var in $(echo '${{ toJSON(vars) }}' | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]'); do
+            echo "$var" >> .env
+          done
+          echo ".env file generated:"
+          cat .env
+
       - name: Build image and push to registry
         uses: docker/build-push-action@v4
         with:
