@@ -37,10 +37,9 @@ jobs:
           for var in $(echo '${{ toJSON(vars) }}' | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]'); do
             echo "$var" >> .env
           done
-
-      - name: Print out .env for debugging purposes
-        run: |
-          cat .env
+        artifacts:
+            paths:
+              - .env
 
       - name: Build image and push to registry
         uses: docker/build-push-action@v4
