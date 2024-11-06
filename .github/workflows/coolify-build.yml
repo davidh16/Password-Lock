@@ -29,6 +29,7 @@ jobs:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.REGISTRY_TOKEN  }}
+          
       - name: Create .env file from vars
         run: |
           echo "Generating .env file from vars..."
@@ -36,7 +37,9 @@ jobs:
           for var in $(echo '${{ toJSON(vars) }}' | jq -r 'to_entries|map("\(.key)=\(.value|tostring)")|.[]'); do
             echo "$var" >> .env
           done
-          echo ".env file generated:"
+
+      - name: Print out .env for debugging purposes
+        run: |
           cat .env
 
       - name: Build image and push to registry
